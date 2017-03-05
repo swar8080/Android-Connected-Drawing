@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="shape_drawing_size_min_percent" format="float" type="dimen">0.01</item>
+    <item name="shape_drawing_size_default_percent" format="float" type="dimen">0.01</item>
+    <item name="shape_drawing_size_max_percent" format="float" type="dimen">0.15</item>
+</resources>

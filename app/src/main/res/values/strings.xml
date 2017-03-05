@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">CollaborativeDrawing</string>
+    <string name="title_activity_host_drawing">HostDrawingActivity</string>
+
+
+    <string name="reset_button_text">Reset</string>
+    <string name="brush_size_button_text">Brush Size</string>
+
+    <string name="colour_picker_icon">Colour</string>
+    <string name="colour_picker_title">Select a Colour:</string>
+
+    <string name="service_id">swar8080.collaborativedrawing</string>
+
+</resources>
