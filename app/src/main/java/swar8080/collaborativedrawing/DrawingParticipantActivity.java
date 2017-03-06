@@ -1,15 +1,13 @@
 package swar8080.collaborativedrawing;
 
-import android.app.Activity;
-import android.content.Context;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.AttributeSet;
 import android.util.Log;
-import android.util.Pair;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -42,6 +40,7 @@ public abstract class DrawingParticipantActivity extends AppCompatActivity imple
     protected TextView mColourPickerIcon;
     protected ColorPickerDialog mColourPickerDialog;
 
+    protected DrawingBrush mDrawingBrush;
     private ScaledShapeDrawer mScaledShapeDrawer;
 
     @Override
@@ -59,6 +58,7 @@ public abstract class DrawingParticipantActivity extends AppCompatActivity imple
 
         mDrawingView = (DrawingView)findViewById(R.id.drawingView);
         mDrawingView.registerOnDrawEventListener(this);
+
         //once the view is fully inflated the run() will be called, allowing the
         //ScaledShapeDrawer to be initalized with the DrawingView's dimensions
         mDrawingView.post(new Runnable() {
@@ -69,7 +69,11 @@ public abstract class DrawingParticipantActivity extends AppCompatActivity imple
                 mScaledShapeDrawer = new ScaledCircleDrawer(mDrawingView.getHeight(),
                         mDrawingView.getWidth(),
                         outValue.getFloat());
-                mDrawingView.setScaledShapeDrawer(mScaledShapeDrawer);
+
+                Paint defaultPaint = new Paint();
+                defaultPaint.setColor(ContextCompat.getColor(DrawingParticipantActivity.this, R.color.defaultDrawingColour));
+                defaultPaint.setStrokeCap(Paint.Cap.ROUND);
+                mDrawingBrush = new DrawingBrush(defaultPaint, mScaledShapeDrawer);
             }
         });
 
@@ -78,7 +82,7 @@ public abstract class DrawingParticipantActivity extends AppCompatActivity imple
         final ColorPickerSwatch.OnColorSelectedListener onColorSelectedListener = new ColorPickerSwatch.OnColorSelectedListener(){
             @Override
             public void onColorSelected(int colour) {
-                mDrawingView.setDrawingColour(colour);
+                mDrawingBrush.setPaintColour(colour);
                 mColourPickerIcon.setBackgroundColor(colour);
                 mColourPickerDialog.dismiss();
             }
@@ -90,7 +94,7 @@ public abstract class DrawingParticipantActivity extends AppCompatActivity imple
             public void onClick(View v) {
                 mColourPickerDialog = ColorPickerDialog.newInstance(R.string.colour_picker_title,
                         ColourPickerColors.getColours(DrawingParticipantActivity.this),
-                        mDrawingView.getDrawingColour(),
+                        mDrawingBrush.getPaintColour(),
                         getResources().getInteger(R.integer.color_pallete_column_count),
                         ColorPickerDialog.SIZE_LARGE);
 

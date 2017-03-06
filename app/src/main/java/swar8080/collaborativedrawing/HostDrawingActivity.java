@@ -3,18 +3,9 @@ package swar8080.collaborativedrawing;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.Toolbar;
 import android.util.Pair;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.colorpicker.ColorPickerDialog;
-import com.android.colorpicker.ColorPickerSwatch;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
@@ -31,7 +22,6 @@ public class HostDrawingActivity extends DrawingParticipantActivity
 {
     //discover indefinitley
     private static final long TIMEOUT_ADVERTISE = Nearby.Connections.DURATION_INDEFINITE;
-
     private ArrayList<String> mConnectedClientIds;
     private ArrayList<byte[]> mDrawingHistorySinceLastReset;
 
@@ -115,16 +105,16 @@ public class HostDrawingActivity extends DrawingParticipantActivity
     }
 
     @Override
-    public void onUserDrawAt(int paintColour, float brushSizeScaleFactor, Pair<Float, Float>[] pointsDrawnAt) {
-        mDrawingView.drawBulkAt(pointsDrawnAt, true);
+    public void onUserDrawAt(Pair<Float, Float>[] pointsDrawnAt) {
+        mDrawingView.drawBulkAt(mDrawingBrush,pointsDrawnAt, true);
 
 
         Pair<Float, Float>[] relativePointsDrawnAt = DrawScalingUtil.getRelativePointLocations(pointsDrawnAt,
                 mDrawingView.getHeight(),
                 mDrawingView.getWidth());
 
-        byte[][] messages = DrawMessageTranslator.encodeDrawMessages(mDrawingView.getDrawingColour(),
-                brushSizeScaleFactor,
+        byte[][] messages = DrawMessageTranslator.encodeDrawMessages(mDrawingBrush.getPaintColour(),
+                mDrawingBrush.getScaledShapeScaleFactor(),
                 relativePointsDrawnAt,
                 Connections.MAX_RELIABLE_MESSAGE_LEN );
 
@@ -147,7 +137,7 @@ public class HostDrawingActivity extends DrawingParticipantActivity
     public void onMessageReceived(String senderId, byte[] message, boolean isReliable) {
         super.onMessageReceived(senderId, message, isReliable);
         for (String clientId : mConnectedClientIds){
-            if (clientId != senderId){
+            if (!clientId.equals(senderId)){
                 //send client's message to all other clients
                 sendMessageToClient(clientId, message);
             }
@@ -166,7 +156,7 @@ public class HostDrawingActivity extends DrawingParticipantActivity
                 mDrawingView.getWidth()
         );
 
-        mDrawingView.drawBulkAt(scaledPointsToDrawAt, drawMessage.getDrawColour(), drawMessage.getRelativeBrushSize(), true);
+        mDrawingView.drawBulkAt(mDrawingBrush, scaledPointsToDrawAt, true);
     }
 
     @Override

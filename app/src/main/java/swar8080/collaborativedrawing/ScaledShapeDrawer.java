@@ -18,7 +18,7 @@ public abstract class ScaledShapeDrawer {
         this.scaleFactor = scaleFactor;
     }
 
-    public abstract void drawScaledShapeAt(Canvas canvas , float x, float y, Paint paint);
+    public abstract void drawScaledShapeAt(Canvas canvas, float x, float y, Paint paint);
 
     public void setScaleFactor(float scaleFactor){
         this.scaleFactor = scaleFactor;

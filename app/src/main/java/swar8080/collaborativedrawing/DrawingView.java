@@ -3,6 +3,7 @@ package swar8080.collaborativedrawing;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
@@ -18,41 +19,20 @@ import android.view.View;
 public class DrawingView extends View {
 
     private int mWidth, mHeight;
-    private Paint mPaint;
-    private ScaledShapeDrawer mShapeDrawer;
     private Canvas mCanvas;
     private Bitmap mBitmap;
     private onUserDrawEventListener mDrawEventListener;
 
     public DrawingView(Context context) {
         super(context);
-        initialize(context);
     }
 
     public DrawingView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        initialize(context);
-    }
-
-    private void initialize(Context context){
-        mPaint = new Paint();
-        mPaint.setColor(ContextCompat.getColor(context, R.color.defaultDrawingColour));
-    }
-
-    public void setDrawingColour(int colour) {
-        mPaint.setColor(colour);
-    }
-
-    public void setScaledShapeDrawer(ScaledShapeDrawer shapeDrawer){
-        this.mShapeDrawer = shapeDrawer;
-    }
-
-    public int getDrawingColour(){
-        return mPaint.getColor();
     }
 
     public interface onUserDrawEventListener {
-        void onUserDrawAt(int paintColour, float brushSizeScaleFactor, Pair<Float, Float>[] pointsDrawnAt);
+        void onUserDrawAt(Pair<Float, Float>[] pointsDrawnAt);
     }
 
     public void registerOnDrawEventListener(onUserDrawEventListener listener){
@@ -62,7 +42,7 @@ public class DrawingView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        canvas.drawBitmap(mBitmap, 0, 0, mPaint);
+        canvas.drawBitmap(mBitmap, 0, 0, null);
     }
 
     @Override
@@ -94,39 +74,26 @@ public class DrawingView extends View {
 
 
             if (mDrawEventListener != null)
-                mDrawEventListener.onUserDrawAt(getDrawingColour(), mShapeDrawer.getScaleFactor(), pointsTouched);
+                mDrawEventListener.onUserDrawAt(pointsTouched);
         }
 
 
         return true;
     }
 
-    public void drawAt(float x, float y, boolean redraw){
-        mShapeDrawer.drawScaledShapeAt(mCanvas, x, y, mPaint);
+    public void drawAt(Drawer drawer, float x, float y, boolean redraw){
+        drawer.drawIntoCanvas(mCanvas, x, y);
         if (redraw)
             invalidate();
+
     }
 
-
-    public void drawBulkAt(Pair<Float,Float>[] points, boolean redrawAtEnd){
+    public void drawBulkAt(Drawer drawer, Pair<Float,Float>[] points, boolean redrawAtEnd){
         for (Pair<Float,Float> pair : points)
-            drawAt(pair.first, pair.second, false);
+            drawAt(drawer, pair.first, pair.second, false);
 
         if (redrawAtEnd)
             invalidate();
-    }
-
-
-    public void drawBulkAt(Pair<Float,Float>[] points, int color, float brushSize, boolean redrawAtEnd){
-        int currentColour = getDrawingColour();
-        float currentBrushSize = mShapeDrawer.getScaleFactor();
-
-        setDrawingColour(color);
-        mShapeDrawer.setScaleFactor(brushSize);
-        drawBulkAt(points, redrawAtEnd);
-
-        setDrawingColour(currentColour);
-        mShapeDrawer.setScaleFactor(currentBrushSize);
     }
 
     public void reset(){

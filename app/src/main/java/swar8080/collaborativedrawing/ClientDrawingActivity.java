@@ -4,8 +4,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Pair;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 
@@ -104,7 +102,7 @@ public class ClientDrawingActivity extends DrawingParticipantActivity
                 mDrawingView.getWidth()
         );
 
-        mDrawingView.drawBulkAt(scaledPointsToDrawAt, drawMessage.getDrawColour(), drawMessage.getRelativeBrushSize(), true);
+        mDrawingView.drawBulkAt(mDrawingBrush, scaledPointsToDrawAt, true);
     }
 
     @Override
@@ -119,15 +117,18 @@ public class ClientDrawingActivity extends DrawingParticipantActivity
     }
 
     @Override
-    public void onUserDrawAt(int paintColour, float brushSizeScaleFactor, Pair<Float, Float>[] pointsDrawnAt) {
-        mDrawingView.drawBulkAt(pointsDrawnAt, true);
+    public void onUserDrawAt(Pair<Float, Float>[] pointsDrawnAt) {
+        mDrawingView.drawBulkAt(mDrawingBrush, pointsDrawnAt, true);
 
         Pair<Float, Float>[] relativePointsDrawnAt = DrawScalingUtil.getRelativePointLocations(pointsDrawnAt,
                 mDrawingView.getHeight(),
                 mDrawingView.getWidth());
 
-        byte[][] messages = DrawMessageTranslator.encodeDrawMessages(paintColour,
-                brushSizeScaleFactor, relativePointsDrawnAt, Connections.MAX_RELIABLE_MESSAGE_LEN );
+        byte[][] messages = DrawMessageTranslator.encodeDrawMessages(mDrawingBrush.getPaintColour(),
+                mDrawingBrush.getScaledShapeScaleFactor(),
+                relativePointsDrawnAt,
+                Connections.MAX_RELIABLE_MESSAGE_LEN );
+
         for (byte[] message : messages)
             sendMessageToHost(message);
     }
