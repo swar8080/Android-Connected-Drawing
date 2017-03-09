@@ -1,5 +1,6 @@
 package swar8080.collaborativedrawing;
 
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -46,6 +47,8 @@ public class ClientDrawingActivity extends DrawingParticipantActivity
     private void startDiscovery(){
         final String serviceIdClientIsLookingFor = getString(R.string.service_id);
 
+        mDiscoverProgressBar.setVisibility(View.VISIBLE);
+
         PendingResult<Status> pendingDiscoveryResult = Nearby.Connections.startDiscovery(mGoogleApiClient,
                 serviceIdClientIsLookingFor,
                 TIMEOUT_DISCOVERY,
@@ -67,6 +70,8 @@ public class ClientDrawingActivity extends DrawingParticipantActivity
             @Override
             public void onResult(@NonNull Status status) {
                 Log(String.format("Discovery result: %s",status.getStatus()));
+                if (status.isSuccess())
+                    mDiscoverProgressBar.setVisibility(View.GONE);
             }
         });
     }
@@ -95,15 +100,6 @@ public class ClientDrawingActivity extends DrawingParticipantActivity
 
     }
 
-    @Override
-    public void onDrawMessageReceived(DrawMessage drawMessage) {
-        Pair<Float,Float>[] scaledPointsToDrawAt = DrawScalingUtil.scaleToScreenSize(drawMessage.getRelativePointsDrawn(),
-                mDrawingView.getHeight(),
-                mDrawingView.getWidth()
-        );
-
-        mDrawingView.drawBulkAt(mDrawingBrush, scaledPointsToDrawAt, true);
-    }
 
     @Override
     public void onResetMessageReceived() {
@@ -114,6 +110,7 @@ public class ClientDrawingActivity extends DrawingParticipantActivity
     @Override
     public void onDisconnected(String hostId) {
         Log(String.format("Client disconnected from host [%s]",hostId));
+        startDiscovery();
     }
 
     @Override

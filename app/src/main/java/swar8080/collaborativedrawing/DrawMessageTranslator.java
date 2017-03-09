@@ -11,6 +11,10 @@ import java.nio.ByteBuffer;
 
 public class DrawMessageTranslator {
 
+    public enum DrawEvents {
+        Draw_EVENT
+    }
+
     public static final byte DRAW_EVENT = 0;
     public static final byte RESET_EVENT = 1;
 
@@ -20,6 +24,27 @@ public class DrawMessageTranslator {
     public interface onDrawMessageHandler {
         void onDrawMessageReceived(DrawMessage drawMessage);
         void onResetMessageReceived();
+    }
+
+    public static void decodeMessage(byte[] message, String userId, onDrawMessageHandler drawMessageHandler) throws DrawMessageDecodingException {
+        if (message == null || message.length == 0)
+            throw new DrawMessageDecodingException("Message was empty");
+
+
+        byte messageType = message[0];
+
+        switch (messageType){
+            case DRAW_EVENT:
+                DrawMessage dm = _decodeDrawMessage(message) ;
+                drawMessageHandler.onDrawMessageReceived(dm);
+                break;
+            case RESET_EVENT:
+                drawMessageHandler.onResetMessageReceived();
+                break;
+            default:
+                throw new DrawMessageDecodingException(String.format("Unknown message received with code %d", messageType));
+        }
+
     }
 
     public static boolean isEvent(byte[] message, byte eventType){
@@ -78,26 +103,6 @@ public class DrawMessageTranslator {
         return new byte[]{RESET_EVENT};
     }
 
-    public static void decodeMessage(byte[] message, onDrawMessageHandler drawMessageHandler) throws DrawMessageDecodingException {
-        if (message == null || message.length == 0)
-            throw new DrawMessageDecodingException("Message was empty");
-
-
-        byte messageType = message[0];
-
-        switch (messageType){
-            case DRAW_EVENT:
-                DrawMessage dm = _decodeDrawMessage(message) ;
-                drawMessageHandler.onDrawMessageReceived(dm);
-                break;
-            case RESET_EVENT:
-                drawMessageHandler.onResetMessageReceived();
-                break;
-            default:
-                throw new DrawMessageDecodingException(String.format("Unknown message received with code %d", messageType));
-        }
-
-    }
 
     private static DrawMessage _decodeDrawMessage(byte[] message) throws DrawMessageDecodingException {
         ByteBuffer buffer;

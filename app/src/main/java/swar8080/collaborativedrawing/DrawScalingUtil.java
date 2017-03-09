@@ -23,9 +23,9 @@ public class DrawScalingUtil {
     }
 
 
-    public static Pair<Float,Float>[] scaleToScreenSize(Pair<Float,Float>[] relativePoints,
-                                                        float drawingAreaHeight,
-                                                        float drawingAreaWidth){
+    public static Pair<Float,Float>[] scalePointsToScreenSize(Pair<Float,Float>[] relativePoints,
+                                                              float drawingAreaHeight,
+                                                              float drawingAreaWidth){
         int pointCount = relativePoints.length;
         float scaledX, scaledY;
 

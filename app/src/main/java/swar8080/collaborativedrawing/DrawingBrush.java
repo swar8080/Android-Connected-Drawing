@@ -17,6 +17,10 @@ public class DrawingBrush implements Drawer {
         mShapeDrawer = shapeDrawer;
     }
 
+    public DrawingBrush(DrawingBrush other){
+
+    }
+
     public void drawIntoCanvas(Canvas canvas, float x, float y){
         mShapeDrawer.drawScaledShapeAt(canvas, x, y, mPaint);
     }

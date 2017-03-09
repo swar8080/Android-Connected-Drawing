@@ -1,5 +1,7 @@
 package swar8080.collaborativedrawing;
 
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -8,6 +10,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.Pair;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,7 +35,8 @@ public abstract class DrawingParticipantActivity extends AppCompatActivity imple
         GoogleApiClient.OnConnectionFailedListener,
         Connections.MessageListener,
         DrawingView.onUserDrawEventListener,
-        DrawMessageTranslator.onDrawMessageHandler    {
+        DrawMessageTranslator.onDrawMessageHandler,
+        BrushSizeSelectorDialogFragment.FinishedSelectingBrushSizeListener{
 
     protected GoogleApiClient mGoogleApiClient;
 
@@ -64,11 +68,9 @@ public abstract class DrawingParticipantActivity extends AppCompatActivity imple
         mDrawingView.post(new Runnable() {
             @Override
             public void run() {
-                TypedValue outValue = new TypedValue();
-                getResources().getValue(R.dimen.shape_drawing_size_default_percent, outValue, true);
-                mScaledShapeDrawer = new ScaledCircleDrawer(mDrawingView.getHeight(),
-                        mDrawingView.getWidth(),
-                        outValue.getFloat());
+
+                mScaledShapeDrawer = new ScaledCircleDrawer(mDrawingView.getHeight(), mDrawingView.getWidth(),
+                        ResourceUtil.getFloatResourceFromDimen(getResources(), R.dimen.shape_drawing_size_default_percent));
 
                 Paint defaultPaint = new Paint();
                 defaultPaint.setColor(ContextCompat.getColor(DrawingParticipantActivity.this, R.color.defaultDrawingColour));
@@ -101,6 +103,13 @@ public abstract class DrawingParticipantActivity extends AppCompatActivity imple
                 mColourPickerDialog.setOnColorSelectedListener(onColorSelectedListener);
 
                 mColourPickerDialog.show(getFragmentManager(), "foo");
+            }
+        });
+
+        findViewById(R.id.brushSizeButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                displayBrushSizeDialog();
             }
         });
 
@@ -166,6 +175,29 @@ public abstract class DrawingParticipantActivity extends AppCompatActivity imple
         } else { Log( "Already disconnected from GoogleAPIClient"); }
     }
 
+    private final static String BRUSH_SIZE_DIALOG_TAG = "BRUSH_SIZE_DIALOG_TAG";
+    protected void displayBrushSizeDialog(){
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        Fragment prev = getFragmentManager().findFragmentByTag(BRUSH_SIZE_DIALOG_TAG);
+        if (prev != null) {
+            ft.remove(prev);
+        }
+        ft.addToBackStack(null);
+
+        BrushSizeSelectorDialogFragment brushSizeFragment = BrushSizeSelectorDialogFragment.newInstance(mDrawingView.getHeight(),
+                ResourceUtil.getFloatResourceFromDimen(getResources(), R.dimen.shape_drawing_size_min_percent),
+                ResourceUtil.getFloatResourceFromDimen(getResources(), R.dimen.shape_drawing_size_max_percent),
+                mDrawingBrush.getScaledShapeScaleFactor(),
+                mDrawingBrush.getPaintColour()
+        );
+        brushSizeFragment.setBrushSizeSelectedListener(this);
+        brushSizeFragment.show(ft, BRUSH_SIZE_DIALOG_TAG);
+    }
+
+    @Override
+    public void onFinishedSelectingBrushSize(float scaleFactor) {
+        mDrawingBrush.setScaledShapeScaleFactor(scaleFactor);
+    }
 
     @Override
     //connection to GoogleApi
@@ -191,11 +223,34 @@ public abstract class DrawingParticipantActivity extends AppCompatActivity imple
     @Override
     public void onMessageReceived(String senderId, byte[] message, boolean isReliable) {
         try {
-            DrawMessageTranslator.decodeMessage(message, this);
+            DrawMessageTranslator.decodeMessage(message, senderId, this);
         }
         catch (DrawMessageTranslator.DrawMessageDecodingException e){
             Log(String.format("Error decoding message from %s: %s", senderId, e.getMessage()));
         }
+    }
+
+    @Override
+    public void onDrawMessageReceived(DrawMessage drawMessage) {
+        int drawingAreaWidth, drawingAreaHeight;
+        Paint messagePaintUsed;
+        ScaledShapeDrawer messageShapeDrawerUsed;
+
+        drawingAreaWidth = mDrawingView.getWidth();
+        drawingAreaHeight = mDrawingView.getHeight();
+
+        Pair<Float,Float>[] scaledPointsToDrawAt = DrawScalingUtil.scalePointsToScreenSize(drawMessage.getRelativePointsDrawn(),
+                drawingAreaWidth,
+                drawingAreaHeight
+        );
+
+        messageShapeDrawerUsed = new ScaledCircleDrawer(drawingAreaHeight,
+                drawingAreaWidth,
+                drawMessage.getRelativeBrushSize());
+        messagePaintUsed = new Paint();
+        messagePaintUsed.setColor(drawMessage.getDrawColour());
+
+        mDrawingView.drawBulkAt(new DrawingBrush(messagePaintUsed, messageShapeDrawerUsed), scaledPointsToDrawAt, true);
     }
 
     protected void Log(String message){

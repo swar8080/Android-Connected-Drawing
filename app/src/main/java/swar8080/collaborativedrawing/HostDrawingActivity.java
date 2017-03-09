@@ -149,15 +149,6 @@ public class HostDrawingActivity extends DrawingParticipantActivity
 
     }
 
-    @Override
-    public void onDrawMessageReceived(DrawMessage drawMessage) {
-        Pair<Float,Float>[] scaledPointsToDrawAt = DrawScalingUtil.scaleToScreenSize(drawMessage.getRelativePointsDrawn(),
-                mDrawingView.getHeight(),
-                mDrawingView.getWidth()
-        );
-
-        mDrawingView.drawBulkAt(mDrawingBrush, scaledPointsToDrawAt, true);
-    }
 
     @Override
     public void onResetMessageReceived() {

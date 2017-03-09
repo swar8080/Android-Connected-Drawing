@@ -72,7 +72,6 @@ public class DrawingView extends View {
                 pointsTouched[move+1] = new Pair<>(event.getHistoricalX(move), event.getHistoricalY(move));
             }
 
-
             if (mDrawEventListener != null)
                 mDrawEventListener.onUserDrawAt(pointsTouched);
         }
