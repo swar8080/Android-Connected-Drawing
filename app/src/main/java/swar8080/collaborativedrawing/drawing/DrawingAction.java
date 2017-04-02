@@ -1,17 +1,17 @@
-package swar8080.collaborativedrawing;
+package swar8080.collaborativedrawing.drawing;
 
-import android.util.Pair;
+import android.support.v4.util.Pair;
 
 /**
- * Created by Steven on 2017-02-23.
+ *
  */
 
-public class DrawMessage {
+public class DrawingAction {
     private int mColour;
     private float mRelativeBrushSize;
     private Pair<Float,Float>[] mRelativePointsDrawn;
 
-    DrawMessage(int colour, float relativeBrushSize, Pair<Float,Float>[] relativePointsDrawn){
+    public DrawingAction(int colour, float relativeBrushSize, Pair<Float,Float>[] relativePointsDrawn){
         this.mColour = colour;
         this.mRelativeBrushSize = relativeBrushSize;
         this.mRelativePointsDrawn = relativePointsDrawn;

@@ -3,17 +3,16 @@ package swar8080.collaborativedrawing;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.Pair;
+import android.support.v4.util.Pair;
 import android.view.MotionEvent;
 import android.view.View;
 
+import swar8080.collaborativedrawing.drawing.Drawer;
+
 /**
- * Created by Steven on 2017-02-20.
+ *
  */
 
 public class DrawingView extends View {
@@ -22,6 +21,7 @@ public class DrawingView extends View {
     private Canvas mCanvas;
     private Bitmap mBitmap;
     private onUserDrawEventListener mDrawEventListener;
+    private boolean mEnabled = true;
 
     public DrawingView(Context context) {
         super(context);
@@ -37,6 +37,10 @@ public class DrawingView extends View {
 
     public void registerOnDrawEventListener(onUserDrawEventListener listener){
         this.mDrawEventListener = listener;
+    }
+
+    public void setEnabled(boolean enabled){
+        mEnabled = enabled;
     }
 
     @Override
@@ -59,6 +63,9 @@ public class DrawingView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (!mEnabled)
+            return true;
+
         Pair<Float,Float>[] pointsTouched;
         Log.d("drawing",event.toString());
         int action = event.getAction();

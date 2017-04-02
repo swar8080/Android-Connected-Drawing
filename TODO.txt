@@ -3,7 +3,6 @@ Optimization
 	- investigate asynchronously building messages
 	- investigate hardcoding some values in calculation
 
-Design
 
 While Discovering
 - Disable DrawingView
@@ -12,4 +11,6 @@ While Discovering
 On Connection (Client)
 - efficiently transfer current drawing
 - client disable DrawingView until last of existing drawing received
+
+
 

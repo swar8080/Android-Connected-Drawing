@@ -1,10 +1,10 @@
-package swar8080.collaborativedrawing;
+package swar8080.collaborativedrawing.util;
 
 import android.content.res.Resources;
 import android.util.TypedValue;
 
 /**
- * Created by Steven on 2017-03-07.
+ *
  */
 
 public class ResourceUtil {

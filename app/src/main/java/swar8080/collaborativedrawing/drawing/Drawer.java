@@ -1,10 +1,10 @@
-package swar8080.collaborativedrawing;
+package swar8080.collaborativedrawing.drawing;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
 /**
- * Created by Steven on 2017-03-06.
+ *
  */
 
 public interface Drawer {

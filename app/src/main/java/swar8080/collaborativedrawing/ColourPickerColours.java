@@ -4,12 +4,12 @@ import android.content.Context;
 import android.support.v4.content.ContextCompat;
 
 /**
- * Created by Steven on 2017-02-25.
+ *
  */
 
-public final class ColourPickerColors {
+public final class ColourPickerColours {
 
-    private ColourPickerColors(){}
+    private ColourPickerColours(){}
 
     private static int[] COLOURS;
 
@@ -17,7 +17,14 @@ public final class ColourPickerColors {
             R.color.defaultDrawingColour,
             R.color.red,
             R.color.blue,
+
+            R.color.orange,
+            R.color.purple,
             R.color.green,
+
+            R.color.white,
+            R.color.grey,
+            R.color.black
     };
 
     public static int[] getColours(Context context){

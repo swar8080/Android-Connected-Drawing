@@ -18,7 +18,7 @@ import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 
 /**
- * Created by Steven on 2017-03-07.
+ *
  */
 
 public class BrushSizeSelectorDialogFragment extends DialogFragment {

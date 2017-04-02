@@ -2,6 +2,8 @@
     <string name="app_name">CollaborativeDrawing</string>
     <string name="title_activity_host_drawing">HostDrawingActivity</string>
 
+    <string name="start_advertising_button_text">Start New Session</string>
+    <string name="available_sessions_header">Searching for existing sessions...</string>
 
     <string name="reset_button_text">Reset</string>
     <string name="brush_size_button_text">Brush Size</string>

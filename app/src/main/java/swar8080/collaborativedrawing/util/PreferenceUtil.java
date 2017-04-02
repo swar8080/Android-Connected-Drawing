@@ -1,9 +1,9 @@
-package swar8080.collaborativedrawing;
+package swar8080.collaborativedrawing.util;
 
 import android.content.Context;
 
 /**
- * Created by Steven on 2017-02-21.
+ *
  */
 
 public class PreferenceUtil {

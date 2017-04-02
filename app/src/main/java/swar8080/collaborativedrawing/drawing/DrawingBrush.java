@@ -1,10 +1,10 @@
-package swar8080.collaborativedrawing;
+package swar8080.collaborativedrawing.drawing;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
 /**
- * Created by Steven on 2017-03-06.
+ *
  */
 
 public class DrawingBrush implements Drawer {
@@ -17,9 +17,6 @@ public class DrawingBrush implements Drawer {
         mShapeDrawer = shapeDrawer;
     }
 
-    public DrawingBrush(DrawingBrush other){
-
-    }
 
     public void drawIntoCanvas(Canvas canvas, float x, float y){
         mShapeDrawer.drawScaledShapeAt(canvas, x, y, mPaint);

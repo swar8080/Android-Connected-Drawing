@@ -9,18 +9,42 @@
 
 
     <Button
-        android:text="Discover"
+        android:text="@string/start_advertising_button_text"
         android:onClick="onClickDiscoverOrAdvertise"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        android:id="@+id/startDiscoverButton" />
+        android:id="@+id/startAdvertiseButton"
+        tools:layout_editor_absoluteX="0dp" />
 
-    <Button
-        android:text="Advertise"
-        android:onClick="onClickDiscoverOrAdvertise"
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/startDiscoverButton"
-        android:id="@+id/startAdvertiseButton" />
+        app:layout_constraintTop_toBottomOf="@+id/startAdvertiseButton"
+        android:id="@+id/availableSessionsHeader"
+        android:text="@string/available_sessions_header"
+        tools:layout_editor_absoluteX="0dp" />
+
+    <FrameLayout
+        app:layout_constraintTop_toBottomOf="@+id/availableSessionsHeader"
+        android:layout_width="368dp"
+        android:layout_height="438dp"
+        tools:layout_editor_absoluteX="8dp">
+
+
+        <android.support.v7.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/availableSessionList"
+            ></android.support.v7.widget.RecyclerView>
+
+
+        <ProgressBar
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/lobbyDiscoverProgressBar"/>
+
+    </FrameLayout>
+
+
+
 </android.support.constraint.ConstraintLayout>

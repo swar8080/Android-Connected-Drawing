@@ -4,41 +4,38 @@ import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.graphics.Paint;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.util.Pair;
-import android.util.TypedValue;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.support.v4.util.Pair;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.colorpicker.ColorPickerDialog;
 import com.android.colorpicker.ColorPickerSwatch;
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.nearby.Nearby;
 import com.google.android.gms.nearby.connection.Connections;
 
+import swar8080.collaborativedrawing.connection.AutoManagedGoogleApiActivity;
+import swar8080.collaborativedrawing.drawing.DrawScalingUtil;
+import swar8080.collaborativedrawing.drawing.DrawingAction;
+import swar8080.collaborativedrawing.drawing.DrawingBrush;
+import swar8080.collaborativedrawing.drawing.ScaledCircleDrawer;
+import swar8080.collaborativedrawing.drawing.ScaledShapeDrawer;
+import swar8080.collaborativedrawing.message.DecodedMessageHandler;
+import swar8080.collaborativedrawing.util.ResourceUtil;
+
 /**
- * Created by Steven on 2017-02-22.
+ *
  */
 
-public abstract class DrawingParticipantActivity extends AppCompatActivity implements
-        GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener,
+public abstract class DrawingParticipantActivity extends AutoManagedGoogleApiActivity implements
         Connections.MessageListener,
         DrawingView.onUserDrawEventListener,
-        DrawMessageTranslator.onDrawMessageHandler,
-        BrushSizeSelectorDialogFragment.FinishedSelectingBrushSizeListener{
+        BrushSizeSelectorDialogFragment.FinishedSelectingBrushSizeListener,
+        DecodedMessageHandler {
 
-    protected GoogleApiClient mGoogleApiClient;
 
     protected DrawingView mDrawingView;
     protected TextView mColourPickerIcon;
@@ -52,9 +49,6 @@ public abstract class DrawingParticipantActivity extends AppCompatActivity imple
         super.onCreate(savedInstanceState);
         setContentView(getLayoutResourceId());
 
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(Nearby.CONNECTIONS_API)
-                .build();
 
         Toolbar toolbar = (Toolbar)findViewById(R.id.drawingToolbar);
         setSupportActionBar(toolbar);
@@ -95,7 +89,7 @@ public abstract class DrawingParticipantActivity extends AppCompatActivity imple
             @Override
             public void onClick(View v) {
                 mColourPickerDialog = ColorPickerDialog.newInstance(R.string.colour_picker_title,
-                        ColourPickerColors.getColours(DrawingParticipantActivity.this),
+                        ColourPickerColours.getColours(DrawingParticipantActivity.this),
                         mDrawingBrush.getPaintColour(),
                         getResources().getInteger(R.integer.color_pallete_column_count),
                         ColorPickerDialog.SIZE_LARGE);
@@ -116,7 +110,7 @@ public abstract class DrawingParticipantActivity extends AppCompatActivity imple
         findViewById(R.id.resetButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                resetDrawing();
+                onResetDrawingPressed();
             }
         });
 
@@ -126,54 +120,23 @@ public abstract class DrawingParticipantActivity extends AppCompatActivity imple
         afterOnCreateCallback(savedInstanceState);
     }
 
+    @Override
+    protected GoogleApiClient.Builder getGoogleApiClientBuilder() {
+        return new GoogleApiClient.Builder(this)
+                .addApi(Nearby.CONNECTIONS_API);
+    }
+
     protected abstract int getLayoutResourceId();
     protected abstract void afterOnCreateCallback(Bundle savedInstanceState);
+    protected abstract void onResetDrawingPressed();
 
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.drawing_menu, menu);
-        return true;
-    }
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        getMenuInflater().inflate(R.menu.drawing_menu, menu);
+//        return true;
+//    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
-            case R.id.action_reset:
-                resetDrawing();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        if (!mGoogleApiClient.isConnected()){
-            Log( "Connecting to GoogleAPIClient");
-
-            //connect is asynchronous and will call one of these callbacks when finished
-            mGoogleApiClient.registerConnectionCallbacks(this);
-            mGoogleApiClient.registerConnectionFailedListener(this);
-
-            mGoogleApiClient.connect();
-        } else { Log( "Already connected to GoogleAPIClient"); }
-
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-
-        if (mGoogleApiClient.isConnected()){
-            mGoogleApiClient.unregisterConnectionCallbacks(this);
-            mGoogleApiClient.unregisterConnectionFailedListener(this);
-            mGoogleApiClient.disconnect();
-            Log( "Disconnecting from GoogleAPIClient");
-        } else { Log( "Already disconnected from GoogleAPIClient"); }
-    }
 
     private final static String BRUSH_SIZE_DIALOG_TAG = "BRUSH_SIZE_DIALOG_TAG";
     protected void displayBrushSizeDialog(){
@@ -182,7 +145,6 @@ public abstract class DrawingParticipantActivity extends AppCompatActivity imple
         if (prev != null) {
             ft.remove(prev);
         }
-        ft.addToBackStack(null);
 
         BrushSizeSelectorDialogFragment brushSizeFragment = BrushSizeSelectorDialogFragment.newInstance(mDrawingView.getHeight(),
                 ResourceUtil.getFloatResourceFromDimen(getResources(), R.dimen.shape_drawing_size_min_percent),
@@ -199,39 +161,9 @@ public abstract class DrawingParticipantActivity extends AppCompatActivity imple
         mDrawingBrush.setScaledShapeScaleFactor(scaleFactor);
     }
 
-    @Override
-    //connection to GoogleApi
-    public void onConnected(@Nullable Bundle bundle) {
-        Log("Connected to GoogleAPI");
-    }
 
     @Override
-    //Connection to GoogleAPI Suspended, GoogleAPI automatically tries to reconnect
-    //but its a good idea to alert the user that it's attempting to reconnect and disable all UI
-    //dependant on the connection
-    public void onConnectionSuspended(int i) {
-        Log("Connection to GoogleAPI suspended");
-    }
-
-    @Override
-    //called when connection to GoogleApi fails
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log("Connection to GoogleAPI failed");
-        //display some error message or prompt to try again
-    }
-
-    @Override
-    public void onMessageReceived(String senderId, byte[] message, boolean isReliable) {
-        try {
-            DrawMessageTranslator.decodeMessage(message, senderId, this);
-        }
-        catch (DrawMessageTranslator.DrawMessageDecodingException e){
-            Log(String.format("Error decoding message from %s: %s", senderId, e.getMessage()));
-        }
-    }
-
-    @Override
-    public void onDrawMessageReceived(DrawMessage drawMessage) {
+    public void onDrawMessageReceived(DrawingAction[] drawActions) {
         int drawingAreaWidth, drawingAreaHeight;
         Paint messagePaintUsed;
         ScaledShapeDrawer messageShapeDrawerUsed;
@@ -239,26 +171,20 @@ public abstract class DrawingParticipantActivity extends AppCompatActivity imple
         drawingAreaWidth = mDrawingView.getWidth();
         drawingAreaHeight = mDrawingView.getHeight();
 
-        Pair<Float,Float>[] scaledPointsToDrawAt = DrawScalingUtil.scalePointsToScreenSize(drawMessage.getRelativePointsDrawn(),
-                drawingAreaWidth,
-                drawingAreaHeight
-        );
+        for (DrawingAction drawAction : drawActions){
+            Pair<Float,Float>[] scaledPointsToDrawAt = DrawScalingUtil.scalePointsToScreenSize(drawAction.getRelativePointsDrawn(),
+                    drawingAreaHeight,
+                    drawingAreaWidth
+            );
 
-        messageShapeDrawerUsed = new ScaledCircleDrawer(drawingAreaHeight,
-                drawingAreaWidth,
-                drawMessage.getRelativeBrushSize());
-        messagePaintUsed = new Paint();
-        messagePaintUsed.setColor(drawMessage.getDrawColour());
+            messageShapeDrawerUsed = new ScaledCircleDrawer(drawingAreaHeight,
+                    drawingAreaWidth,
+                    drawAction.getRelativeBrushSize());
+            messagePaintUsed = new Paint();
+            messagePaintUsed.setColor(drawAction.getDrawColour());
 
-        mDrawingView.drawBulkAt(new DrawingBrush(messagePaintUsed, messageShapeDrawerUsed), scaledPointsToDrawAt, true);
+            mDrawingView.drawBulkAt(new DrawingBrush(messagePaintUsed, messageShapeDrawerUsed), scaledPointsToDrawAt, true);
+        }
     }
 
-    protected void Log(String message){
-        Log.d(getClass().getSimpleName(),message);
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-    }
-
-    protected void resetDrawing(){
-        mDrawingView.reset();
-    }
 }

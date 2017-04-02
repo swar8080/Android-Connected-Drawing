@@ -14,15 +14,14 @@
         android:layout_height="match_parent"
         android:layout_weight="1">
 
+        <ProgressBar android:id="@+id/clientConnectingProgressBar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            />
+
         <include layout="@layout/drawing_layout">
 
         </include>
-
-        <ProgressBar
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/discoverProgressBar"
-            android:visibility="gone"/>
 
     </FrameLayout>
 

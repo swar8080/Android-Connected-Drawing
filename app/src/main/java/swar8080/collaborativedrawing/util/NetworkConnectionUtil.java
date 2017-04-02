@@ -1,11 +1,11 @@
-package swar8080.collaborativedrawing;
+package swar8080.collaborativedrawing.util;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
 /**
- * Created by Steven on 2017-02-23.
+ *
  */
 
 public class NetworkConnectionUtil {
@@ -13,6 +13,7 @@ public class NetworkConnectionUtil {
     private static final int[] NETWORK_TYPES = {ConnectivityManager.TYPE_WIFI,
             ConnectivityManager.TYPE_ETHERNET};
 
+    //todo check whether users are connected to internet
     public static boolean isConnectedToNetwork(Context context) {
         ConnectivityManager connManager =
                 (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);

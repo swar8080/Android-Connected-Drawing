@@ -1,10 +1,10 @@
 package swar8080.collaborativedrawing;
 
-import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Pair;
+import android.support.v4.util.Pair;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 
@@ -14,17 +14,34 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.nearby.Nearby;
 import com.google.android.gms.nearby.connection.Connections;
 
+import swar8080.collaborativedrawing.connection.NearbyConnectionsUtil;
+import swar8080.collaborativedrawing.drawing.DrawScalingUtil;
+import swar8080.collaborativedrawing.message.EncodedMessage;
+import swar8080.collaborativedrawing.message.HandshakeIdentifier;
+import swar8080.collaborativedrawing.message.HandshakeTranslator;
+import swar8080.collaborativedrawing.message.MessageAccumulator;
+import swar8080.collaborativedrawing.message.MessageProgress;
+import swar8080.collaborativedrawing.message.MessageProgressIdentifier;
+import swar8080.collaborativedrawing.message.MessageStatus;
+import swar8080.collaborativedrawing.message.MessageTranslator;
+import swar8080.collaborativedrawing.util.PreferenceUtil;
+
 /**
- * Created by Steven on 2017-02-21.
+ *
  */
 
 public class ClientDrawingActivity extends DrawingParticipantActivity
 {
+    public static final String HOST_ID_EXTRA = "HOST_ID_EXTRA";
+    public static final String HOST_NAME_EXTRA = "HOST_NAME_EXTRA";
+
+    private String mHostId, mSessionName;
+    private MessageAccumulator<MessageProgressIdentifier> mMessageAccumulator;
+
+    private ProgressBar mConnectingProgressBar;
 
     private static final long TIMEOUT_DISCOVERY = Nearby.Connections.DURATION_INDEFINITE;
-
-    private ProgressBar mDiscoverProgressBar;
-    private String mHostId;
+    private final String LOG_TAG = getClass().getSimpleName();
 
     @Override
     protected int getLayoutResourceId() {
@@ -33,7 +50,17 @@ public class ClientDrawingActivity extends DrawingParticipantActivity
 
     @Override
     protected void afterOnCreateCallback(Bundle savedInstanceState) {
-        mDiscoverProgressBar = (ProgressBar)findViewById(R.id.discoverProgressBar);
+        mDrawingView.setEnabled(false);
+
+        Bundle connectionDetailsExtra = getIntent().getExtras();
+        if (connectionDetailsExtra != null){
+            mHostId = connectionDetailsExtra.getString(HOST_ID_EXTRA);
+            mSessionName = connectionDetailsExtra.getString(HOST_NAME_EXTRA);
+        }
+
+        mConnectingProgressBar = (ProgressBar)findViewById(R.id.clientConnectingProgressBar);
+
+        mMessageAccumulator = new MessageAccumulator<>();
     }
 
 
@@ -41,44 +68,54 @@ public class ClientDrawingActivity extends DrawingParticipantActivity
     //connection to GoogleApi
     public void onConnected(@Nullable Bundle bundle) {
         super.onConnected(bundle);
-        startDiscovery();
+        if (mHostId != null && mSessionName != null){
+            //must first find session through discovery before requesting a connection
+            PendingResult<Status> r = Nearby.Connections.startDiscovery(mGoogleApiClient,
+                    NearbyConnectionsUtil.getServiceId(this),
+                    TIMEOUT_DISCOVERY,
+                    new Connections.EndpointDiscoveryListener() {
+                @Override
+                public void onEndpointFound(String hostId, String serviceId, String hostName) {
+
+                    Log.d(LOG_TAG,"Found endpoint during discover");
+                    //if the correct session is found, request a connection
+                    if (mHostId.equals(hostId) && mSessionName.equals(hostName)){
+                        clientRequestConnection(mHostId, mSessionName);
+                    }
+                }
+
+                @Override
+                public void onEndpointLost(String s) {
+                    Log.d(LOG_TAG,"Lost endpoint during discover");
+                }
+            });
+
+            r.setResultCallback(new ResultCallback<Status>() {
+                @Override
+                public void onResult(@NonNull Status status) {
+                    Log.d(LOG_TAG,"Discover result " + status.toString());
+                }
+            });
+        }
+        else {
+            exitToLobby();
+        }
     }
 
-    private void startDiscovery(){
-        final String serviceIdClientIsLookingFor = getString(R.string.service_id);
-
-        mDiscoverProgressBar.setVisibility(View.VISIBLE);
-
-        PendingResult<Status> pendingDiscoveryResult = Nearby.Connections.startDiscovery(mGoogleApiClient,
-                serviceIdClientIsLookingFor,
-                TIMEOUT_DISCOVERY,
-                new Connections.EndpointDiscoveryListener() {
-                    @Override
-                    public void onEndpointFound(String hostId, String serviceId, String hostName) {
-                        if (serviceId.equals(serviceIdClientIsLookingFor)){
-                            clientRequestConnection(hostId,hostName,null);
-                        }
-                    }
-
-                    @Override
-                    public void onEndpointLost(String hostId) {
-
-                    }
-                });
-
-        pendingDiscoveryResult.setResultCallback(new ResultCallback<Status>() {
-            @Override
-            public void onResult(@NonNull Status status) {
-                Log(String.format("Discovery result: %s",status.getStatus()));
-                if (status.isSuccess())
-                    mDiscoverProgressBar.setVisibility(View.GONE);
-            }
-        });
+    public void exitToLobby(){
+        //todo exit if session is not available
+        Log.d(LOG_TAG, "exiting to lobby");
+        mDrawingView.setEnabled(false);
+        mConnectingProgressBar.setVisibility(View.VISIBLE);
     }
 
-    private void clientRequestConnection(final String hostId, String hostName, byte[] connectionMessage){
+    private void clientRequestConnection(final String hostId, String hostName){
 
         //TODO have client send the dimensions of its DrawingView on connection
+        byte[] connectionMessage = HandshakeTranslator.encodeIdentifierHeader(
+                HandshakeIdentifier.PARTICIPANT);
+
+
 
         Nearby.Connections.sendConnectionRequest(mGoogleApiClient,
                 PreferenceUtil.getDisplayName(this),
@@ -88,29 +125,54 @@ public class ClientDrawingActivity extends DrawingParticipantActivity
 
                     @Override
                     public void onConnectionResponse(String hostId, Status status, byte[] message) {
-                        Log( String.format("Connection Response from host [%s]:[%s]:[%s]",hostId,status.getStatusMessage(),status.getStatus()));
+                        Log.d(LOG_TAG,String.format("Connection Response from host [%s]:[%s]:[%s]",hostId,status.getStatusMessage(),status.getStatus()));
                         if (status.isSuccess()){
-                            mHostId = hostId;
-                            mDiscoverProgressBar.setVisibility(View.GONE);
+                            mDrawingView.setEnabled(true);
+                            mConnectingProgressBar.setVisibility(View.GONE);
                         }
                     }
                 },
-                this);
+                this).setResultCallback(new ResultCallback<Status>() {
+            @Override
+            public void onResult(@NonNull Status status) {
+                Log.d(LOG_TAG,String.format("Client request connection result: %s ",status.toString()));
+            }
+        });
 
 
     }
 
+    @Override
+    public void onMessageReceived(String senderId, byte[] payload, boolean isReliable) {
+        try {
+            MessageProgress messageProgress = MessageTranslator.getMessageProgress(senderId, payload);
+            mMessageAccumulator.addMessage(messageProgress.getMessageIdentifier(), payload);
+
+            if (MessageStatus.DONE == messageProgress.getMessageStatus()){
+                EncodedMessage message = mMessageAccumulator.removeMessage(messageProgress.getMessageIdentifier());
+                MessageTranslator.decodeMessage(message, this);
+            }
+
+        } catch (MessageTranslator.MessageDecodingException e) {
+            Log.d(LOG_TAG,e.getMessage());
+        }
+    }
+
+    @Override
+    protected void onResetDrawingPressed() {
+        //request a reset, reset() only after host acknowledges by sending back a reset message of its own
+        sendMessageToHost(MessageTranslator.encodeResetMessage());
+    }
 
     @Override
     public void onResetMessageReceived() {
-        super.resetDrawing();
-        sendMessageToHost(DrawMessageTranslator.encodeResetMessage());
+        mDrawingView.reset();
     }
 
     @Override
     public void onDisconnected(String hostId) {
-        Log(String.format("Client disconnected from host [%s]",hostId));
-        startDiscovery();
+        Log.d(LOG_TAG,String.format("Client disconnected from host [%s]",hostId));
+        exitToLobby();
     }
 
     @Override
@@ -121,16 +183,17 @@ public class ClientDrawingActivity extends DrawingParticipantActivity
                 mDrawingView.getHeight(),
                 mDrawingView.getWidth());
 
-        byte[][] messages = DrawMessageTranslator.encodeDrawMessages(mDrawingBrush.getPaintColour(),
+        EncodedMessage message = MessageTranslator.encodeDrawMessages(mDrawingBrush.getPaintColour(),
                 mDrawingBrush.getScaledShapeScaleFactor(),
                 relativePointsDrawnAt,
                 Connections.MAX_RELIABLE_MESSAGE_LEN );
 
-        for (byte[] message : messages)
-            sendMessageToHost(message);
+        sendMessageToHost(message);
     }
 
-    private void sendMessageToHost(byte[] message){
-        Nearby.Connections.sendReliableMessage(mGoogleApiClient, mHostId, message);
+    private void sendMessageToHost(EncodedMessage message){
+        byte[][] payloads = message.getMessage();
+        for (byte[] payload : payloads)
+            Nearby.Connections.sendReliableMessage(mGoogleApiClient, mHostId, payload);
     }
 }

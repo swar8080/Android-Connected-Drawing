@@ -1,9 +1,9 @@
-package swar8080.collaborativedrawing;
+package swar8080.collaborativedrawing.drawing;
 
-import android.util.Pair;
+import android.support.v4.util.Pair;
 
 /**
- * Created by Steven on 2017-02-23.
+ *
  */
 
 public class DrawScalingUtil {
