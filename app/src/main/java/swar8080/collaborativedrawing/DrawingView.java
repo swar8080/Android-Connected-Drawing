@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.support.v4.util.Pair;
 import android.view.MotionEvent;
 import android.view.View;
@@ -21,7 +20,7 @@ public class DrawingView extends View {
     private Canvas mCanvas;
     private Bitmap mBitmap;
     private onUserDrawEventListener mDrawEventListener;
-    private boolean mEnabled = true;
+    private boolean mDrawingEnabled = true;
 
     public DrawingView(Context context) {
         super(context);
@@ -39,8 +38,8 @@ public class DrawingView extends View {
         this.mDrawEventListener = listener;
     }
 
-    public void setEnabled(boolean enabled){
-        mEnabled = enabled;
+    public void setDrawingEnabled(boolean enabled){
+        mDrawingEnabled = enabled;
     }
 
     @Override
@@ -63,26 +62,24 @@ public class DrawingView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (!mEnabled)
-            return true;
+        if (mDrawingEnabled) {
+            Pair<Float, Float>[] pointsTouched;
 
-        Pair<Float,Float>[] pointsTouched;
-        Log.d("drawing",event.toString());
-        int action = event.getAction();
-        if (MotionEvent.ACTION_DOWN == action
-                || MotionEvent.ACTION_MOVE == action){
+            int action = event.getAction();
+            if (MotionEvent.ACTION_DOWN == action
+                    || MotionEvent.ACTION_MOVE == action) {
 
-            pointsTouched = new Pair[1 + event.getHistorySize()];
-            pointsTouched[0] = new Pair<>(event.getX(), event.getY());
+                pointsTouched = new Pair[1 + event.getHistorySize()];
+                pointsTouched[0] = new Pair<>(event.getX(), event.getY());
 
-            for(int move = 0; move < event.getHistorySize(); move++){
-                pointsTouched[move+1] = new Pair<>(event.getHistoricalX(move), event.getHistoricalY(move));
+                for (int move = 0; move < event.getHistorySize(); move++) {
+                    pointsTouched[move + 1] = new Pair<>(event.getHistoricalX(move), event.getHistoricalY(move));
+                }
+
+                if (mDrawEventListener != null)
+                    mDrawEventListener.onUserDrawAt(pointsTouched);
             }
-
-            if (mDrawEventListener != null)
-                mDrawEventListener.onUserDrawAt(pointsTouched);
         }
-
 
         return true;
     }

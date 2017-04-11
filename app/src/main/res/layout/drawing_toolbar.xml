@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"
+
     android:id="@+id/drawingToolbar"
     android:title=""
     android:layout_width="match_parent"
@@ -10,37 +11,69 @@
     >
 
 
-    <Button android:id="@+id/brushSizeButton"
-    android:layout_height="match_parent"
-    android:layout_width="wrap_content"
-    android:layout_marginRight="5dp"
-    android:text="@string/brush_size_button_text"
-    android:layout_gravity="center"
-    >
-    </Button>
+    <FrameLayout android:layout_height="match_parent"
+        android:layout_width="match_parent">
 
-    <TextView android:id="@+id/colourPickingIcon"
-        android:text="@string/colour_picker_icon"
-        android:layout_width="70dp"
-        android:layout_height="match_parent"
-        android:layout_margin="5dp"
-        android:background="@color/defaultDrawingColour"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:textColor="@color/colourBlack"
-        android:textStyle="bold"
-        ></TextView>
+        <TextView android:id="@+id/drawingToolbarStatus"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            android:gravity="center"
+            android:textSize="24sp"
 
-    
-    <Button android:id="@+id/resetButton"
-        android:layout_height="match_parent"
-        android:layout_width="wrap_content"
-        android:text="@string/reset_button_text"
-        android:layout_gravity="center"
-        android:layout_marginLeft="5dp"
-        >
+            tools:visibility="visible"
+            tools:text="Drawing Status"/>
 
-    </Button>
+
+        <LinearLayout
+            android:id="@+id/drawingToolbarControls"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:visibility="visible"
+            tools:visibility="gone">
+
+
+            <Button android:id="@+id/brushSizeButton"
+                android:layout_height="match_parent"
+                android:layout_width="wrap_content"
+                android:layout_marginRight="5dp"
+                android:text="@string/brush_size_button_text"
+                android:layout_gravity="center"
+                >
+            </Button>
+
+            <TextView android:id="@+id/colourPickingIcon"
+                android:text="@string/colour_picker_icon"
+                android:layout_width="70dp"
+                android:layout_height="match_parent"
+                android:layout_margin="5dp"
+                android:background="@color/defaultDrawingColour"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:textColor="@color/colourBlack"
+                android:textStyle="bold"
+                />
+
+
+            <Button android:id="@+id/resetButton"
+                android:layout_height="match_parent"
+                android:layout_width="wrap_content"
+                android:text="@string/reset_button_text"
+                android:layout_gravity="center"
+                android:layout_marginLeft="5dp"
+                >
+
+            </Button>
+        </LinearLayout>
+
+    </FrameLayout>
+
+
+
+
+
+
 
 
 </android.support.v7.widget.Toolbar>

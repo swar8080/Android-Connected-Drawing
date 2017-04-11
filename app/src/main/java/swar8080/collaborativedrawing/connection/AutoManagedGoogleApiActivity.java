@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
@@ -23,6 +22,11 @@ public abstract class AutoManagedGoogleApiActivity extends AppCompatActivity imp
     protected GoogleApiClient mGoogleApiClient;
     protected abstract GoogleApiClient.Builder getGoogleApiClientBuilder();
 
+    //hack to deal with Google API not being able to connect immediatley
+    //when switching to another activity using a GoogleApiClient
+    private int mMaxConnectAttempts = 5;
+    private int mConnectAttempts;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,13 +39,15 @@ public abstract class AutoManagedGoogleApiActivity extends AppCompatActivity imp
     }
 
     protected final void disconnectAndStartActivity(Intent intent){
-        //addresses issue with starting a new activity that also connects to google api
+        mGoogleApiClient.disconnect();
         mGoogleApiClient.stopAutoManage(this);
         startActivity(intent);
+        finish();
     }
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
+        mConnectAttempts = 0;
         Log.d(LOG_TAG, "Connected to GoogleAPI");
     }
 
@@ -52,6 +58,11 @@ public abstract class AutoManagedGoogleApiActivity extends AppCompatActivity imp
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.d(LOG_TAG, "Connection to GoogleApi Failed");
+        Log.d(LOG_TAG, "Connection to GoogleApi Failed: " + connectionResult.getErrorCode());
+        if (++mConnectAttempts <= mMaxConnectAttempts){
+            mGoogleApiClient.connect();
+            Log.d(LOG_TAG,"GoogleAPI reconnect attempt " + String.valueOf(mConnectAttempts));
+        }
+
     }
 }

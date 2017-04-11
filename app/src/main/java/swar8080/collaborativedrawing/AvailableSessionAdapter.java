@@ -31,11 +31,6 @@ public class AvailableSessionAdapter extends RecyclerView.Adapter<AvailableSessi
 
 
     public void updateOrInsertSession(AvailableSession availableSession){
-//        int targetIndex = mAvailableSessions.indexOf(availableSession);
-//        if (targetIndex != -1){
-//            notifyItemChanged(targetIndex);
-//        }
-
         AvailableSession existingSession;
         int length = mAvailableSessions.size();
 

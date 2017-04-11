@@ -19,15 +19,16 @@
         <meta-data android:name="com.google.android.gms.nearby.connection.SERVICE_ID"
             android:value="@string/service_id" />
 
-        <activity android:name=".LobbyActivity">
+        <activity android:name=".LobbyActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".HostDrawingActivity"></activity>
-        <activity android:name=".ClientDrawingActivity"></activity>
+        <activity android:name=".HostDrawingActivity" android:screenOrientation="portrait"></activity>
+        <activity android:name=".ClientDrawingActivity" android:screenOrientation="portrait"></activity>
     </application>
 
 </manifest>

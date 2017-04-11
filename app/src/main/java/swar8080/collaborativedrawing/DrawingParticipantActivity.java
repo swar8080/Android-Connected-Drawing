@@ -2,12 +2,14 @@ package swar8080.collaborativedrawing;
 
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.support.v4.util.Pair;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.TextView;
 
@@ -44,15 +46,20 @@ public abstract class DrawingParticipantActivity extends AutoManagedGoogleApiAct
     protected DrawingBrush mDrawingBrush;
     private ScaledShapeDrawer mScaledShapeDrawer;
 
+    private TextView mConnectionStatusTextView;
+    private ViewGroup mToolbarControlGroup;
+
     @Override
     protected final void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(getLayoutResourceId());
 
-
         Toolbar toolbar = (Toolbar)findViewById(R.id.drawingToolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(null);
+
+        mConnectionStatusTextView = (TextView)findViewById(R.id.drawingToolbarStatus);
+        mToolbarControlGroup = (ViewGroup)findViewById(R.id.drawingToolbarControls);
 
         mDrawingView = (DrawingView)findViewById(R.id.drawingView);
         mDrawingView.registerOnDrawEventListener(this);
@@ -74,7 +81,7 @@ public abstract class DrawingParticipantActivity extends AutoManagedGoogleApiAct
         });
 
 
-
+        //set up callbacks for colour picking dialog
         final ColorPickerSwatch.OnColorSelectedListener onColorSelectedListener = new ColorPickerSwatch.OnColorSelectedListener(){
             @Override
             public void onColorSelected(int colour) {
@@ -96,7 +103,7 @@ public abstract class DrawingParticipantActivity extends AutoManagedGoogleApiAct
 
                 mColourPickerDialog.setOnColorSelectedListener(onColorSelectedListener);
 
-                mColourPickerDialog.show(getFragmentManager(), "foo");
+                mColourPickerDialog.show(getFragmentManager(), "ColourPickerDialog");
             }
         });
 
@@ -114,7 +121,6 @@ public abstract class DrawingParticipantActivity extends AutoManagedGoogleApiAct
             }
         });
 
-        //TODO move flag to keep screen on to more appropriate location
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         afterOnCreateCallback(savedInstanceState);
@@ -126,17 +132,13 @@ public abstract class DrawingParticipantActivity extends AutoManagedGoogleApiAct
                 .addApi(Nearby.CONNECTIONS_API);
     }
 
+    //returns the layout resource id that should be inflated for this activity
     protected abstract int getLayoutResourceId();
+
+    //subclasses do not override onCreate directly, instead they implement this method
     protected abstract void afterOnCreateCallback(Bundle savedInstanceState);
+
     protected abstract void onResetDrawingPressed();
-
-
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        getMenuInflater().inflate(R.menu.drawing_menu, menu);
-//        return true;
-//    }
-
 
     private final static String BRUSH_SIZE_DIALOG_TAG = "BRUSH_SIZE_DIALOG_TAG";
     protected void displayBrushSizeDialog(){
@@ -160,7 +162,6 @@ public abstract class DrawingParticipantActivity extends AutoManagedGoogleApiAct
     public void onFinishedSelectingBrushSize(float scaleFactor) {
         mDrawingBrush.setScaledShapeScaleFactor(scaleFactor);
     }
-
 
     @Override
     public void onDrawMessageReceived(DrawingAction[] drawActions) {
@@ -187,4 +188,22 @@ public abstract class DrawingParticipantActivity extends AutoManagedGoogleApiAct
         }
     }
 
+    protected final void showControls(){
+        mConnectionStatusTextView.setVisibility(View.GONE);
+        mToolbarControlGroup.setVisibility(View.VISIBLE);
+    }
+
+    protected final void showToolbarStatus(String statusMessage){
+        mToolbarControlGroup.setVisibility(View.GONE);
+
+        mConnectionStatusTextView.setText(statusMessage);
+        mConnectionStatusTextView.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent();
+        intent.setClass(this,LobbyActivity.class);
+        super.disconnectAndStartActivity(intent);
+    }
 }

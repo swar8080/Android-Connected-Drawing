@@ -50,6 +50,13 @@ public class LobbyActivity extends AutoManagedGoogleApiActivity implements Avail
         mSerialUserCountUpdateExecutor = new SerialExecutor();
 
         mDiscoverProgressBar = (ProgressBar)findViewById(R.id.lobbyDiscoverProgressBar);
+
+        findViewById(R.id.startAdvertiseButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startAdvertising();
+            }
+        });
     }
 
     @Override
@@ -89,7 +96,6 @@ public class LobbyActivity extends AutoManagedGoogleApiActivity implements Avail
     private class GetSessionUserCountRunnable implements Runnable{
 
         private AvailableSession sessionToUpdate;
-        private final String TAG = getClass().getSimpleName();
 
         public GetSessionUserCountRunnable(AvailableSession session) {
             sessionToUpdate = session;
@@ -113,14 +119,13 @@ public class LobbyActivity extends AutoManagedGoogleApiActivity implements Avail
                                 if (result.isSuccesful()){
                                     UserCountResponse userCountResponse = result.getResult();
                                     onUserCountReceived(sessionToUpdate,userCountResponse);
-                                    //Log.d(TAG, String.format("Received user count from %s of %d", sessionToUpdate.getHostId(), userCountResponse.toString()));
                                 }
 
                                 //disconnect so that other hosts can be polled for their user count
                                 Nearby.Connections.disconnectFromEndpoint(mGoogleApiClient ,endPointId);
                             }
                             else {
-                                //Log.d(TAG, String.format("Failed to receive user count from %s, status: %s", sessionToUpdate.getHostId(), status.getStatusMessage()));
+                                //todo add logging when connection response is not succesful
                             }
                         }
                     },
@@ -128,13 +133,6 @@ public class LobbyActivity extends AutoManagedGoogleApiActivity implements Avail
 
             //block until response received
             status.await();
-        }
-    }
-
-
-    public void onClickDiscoverOrAdvertise(View view){
-        if (R.id.startAdvertiseButton == view.getId()){
-            startAdvertising();
         }
     }
 

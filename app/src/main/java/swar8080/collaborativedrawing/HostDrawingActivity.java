@@ -49,6 +49,8 @@ public class HostDrawingActivity extends DrawingParticipantActivity
         mConnectParticipantIds = new ArrayList<>();
         mDrawingHistorySinceLastReset = new LinkedList<EncodedMessage>();
         mMessageAccumulator = new MessageAccumulator<>();
+
+        super.showControls();
     }
 
     @Override
