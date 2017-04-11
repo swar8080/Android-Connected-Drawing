@@ -5,6 +5,12 @@
     <string name="start_advertising_button_text">Start New Session</string>
     <string name="available_sessions_header">Searching for existing sessions...</string>
 
+    <string name="drawing_status_connecting_host">Connecting to session...</string>
+    <string name="drawing_status_no_connection">Not connected to internet</string>
+    <string name="drawing_status_reconnecting">Attempting to reconnect...</string>
+    <string name="drawing_status_connecting_api">Connecting to Google API...</string>
+    <string name="drawing_status_connecting_api_failed">Connection to Google API Failed</string>
+
     <string name="reset_button_text">Reset</string>
     <string name="brush_size_button_text">Brush Size</string>
 
