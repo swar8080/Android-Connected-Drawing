@@ -1,19 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="horizontal" android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="8dp"
+    android:layout_marginRight="8dp">
 
 
     <TextView
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:id="@+id/session_name"
-        android:layout_weight="0.8"
+        android:id="@+id/availableSessionName"
+        android:layout_weight="0.65"
         android:gravity="center_vertical"
-        android:textSize="16sp"
+        android:textSize="28sp"
         android:textColor="@color/colourBlack"
-        android:paddingLeft="20dp"
         tools:text="Player Name"/>
 
 
@@ -35,10 +37,12 @@
 
         tools:text="10" />
 
-
-
-
-
-
+    <Button android:id="@+id/join_session_button"
+        android:layout_width="0dp"
+        android:layout_height="40sp"
+        android:layout_weight="0.15"
+        android:layout_gravity="center"
+        android:text="@string/join_session_button"
+        android:textSize="10sp"/>
 
 </LinearLayout>

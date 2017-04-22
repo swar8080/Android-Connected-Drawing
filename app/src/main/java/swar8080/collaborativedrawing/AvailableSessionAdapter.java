@@ -81,22 +81,23 @@ public class AvailableSessionAdapter extends RecyclerView.Adapter<AvailableSessi
         return mAvailableSessions.size();
     }
 
-    class AvailableSessionViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    class AvailableSessionViewHolder extends RecyclerView.ViewHolder{
 
         private TextView mSessionNameView, mSessionCountView;
 
         public AvailableSessionViewHolder(View itemView) {
             super(itemView);
 
-            mSessionNameView = (TextView)itemView.findViewById(R.id.session_name);
+            mSessionNameView = (TextView)itemView.findViewById(R.id.availableSessionName);
             mSessionCountView = (TextView)itemView.findViewById(R.id.session_participant_count);
-            itemView.setOnClickListener(this);
-        }
 
-        @Override
-        public void onClick(View v) {
-            AvailableSession selectedSession = mAvailableSessions.get(getAdapterPosition());
-            mSessionClickHandler.onSessionSelected(selectedSession);
+            itemView.findViewById(R.id.join_session_button).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    AvailableSession selectedSession = mAvailableSessions.get(getAdapterPosition());
+                    mSessionClickHandler.onSessionSelected(selectedSession);
+                }
+            });
         }
 
         public void bindSessionName(String sessionName){

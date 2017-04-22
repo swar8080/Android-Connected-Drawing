@@ -156,7 +156,7 @@ public class ClientDrawingActivity extends DrawingParticipantActivity
                 HandshakeIdentifier.PARTICIPANT);
 
         Nearby.Connections.sendConnectionRequest(mGoogleApiClient,
-                PreferenceUtil.getDisplayName(this),
+                PreferenceUtil.getPrefScreenName(this),
                 hostId,
                 connectionMessage,
                 new Connections.ConnectionResponseCallback(){

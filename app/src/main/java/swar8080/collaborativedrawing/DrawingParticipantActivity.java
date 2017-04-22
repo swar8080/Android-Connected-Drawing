@@ -38,6 +38,8 @@ public abstract class DrawingParticipantActivity extends AutoManagedGoogleApiAct
         BrushSizeSelectorDialogFragment.FinishedSelectingBrushSizeListener,
         DecodedMessageHandler {
 
+    public static final String SCREEN_NAME = "SCREEN_NAME";
+    protected String mScreenName;
 
     protected DrawingView mDrawingView;
     protected TextView mColourPickerIcon;
@@ -53,6 +55,8 @@ public abstract class DrawingParticipantActivity extends AutoManagedGoogleApiAct
     protected final void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(getLayoutResourceId());
+
+        mScreenName = getIntent().getStringExtra(SCREEN_NAME);
 
         Toolbar toolbar = (Toolbar)findViewById(R.id.drawingToolbar);
         setSupportActionBar(toolbar);

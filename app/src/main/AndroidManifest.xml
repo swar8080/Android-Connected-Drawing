@@ -20,7 +20,8 @@
             android:value="@string/service_id" />
 
         <activity android:name=".LobbyActivity"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateUnchanged">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

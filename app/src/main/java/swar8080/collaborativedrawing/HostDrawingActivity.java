@@ -14,6 +14,7 @@ import com.google.android.gms.nearby.Nearby;
 import com.google.android.gms.nearby.connection.Connections;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 import swar8080.collaborativedrawing.drawing.DrawScalingUtil;
@@ -26,7 +27,6 @@ import swar8080.collaborativedrawing.message.MessageProgress;
 import swar8080.collaborativedrawing.message.MessageProgressIdentifier;
 import swar8080.collaborativedrawing.message.MessageStatus;
 import swar8080.collaborativedrawing.message.UserCountResponse;
-import swar8080.collaborativedrawing.util.PreferenceUtil;
 
 /**
  *
@@ -34,19 +34,21 @@ import swar8080.collaborativedrawing.util.PreferenceUtil;
 
 public class HostDrawingActivity extends DrawingParticipantActivity
 {
+
     //discover indefinitley
     private static final long TIMEOUT_ADVERTISE = Nearby.Connections.DURATION_INDEFINITE;
 
-    private ArrayList<String> mConnectParticipantIds;
+    private HashMap<String,String> mConnectParticipantIds;
     private LinkedList<EncodedMessage> mDrawingHistorySinceLastReset;
 
     private MessageAccumulator<MessageProgressIdentifier> mMessageAccumulator;
 
     private final String TAG = getClass().getSimpleName();
 
+
     @Override
     protected void afterOnCreateCallback(Bundle savedInstanceState) {
-        mConnectParticipantIds = new ArrayList<>();
+        mConnectParticipantIds = new HashMap<String, String>();
         mDrawingHistorySinceLastReset = new LinkedList<EncodedMessage>();
         mMessageAccumulator = new MessageAccumulator<>();
 
@@ -68,8 +70,7 @@ public class HostDrawingActivity extends DrawingParticipantActivity
 
     public void startAdvertising(){
         PendingResult<Connections.StartAdvertisingResult> pendingAdvertisingResult =
-                Nearby.Connections.startAdvertising(mGoogleApiClient,
-                PreferenceUtil.getDisplayName(this),
+                Nearby.Connections.startAdvertising(mGoogleApiClient, mScreenName,
                 null,
                 TIMEOUT_ADVERTISE,
                 new Connections.ConnectionRequestListener() {
@@ -103,7 +104,7 @@ public class HostDrawingActivity extends DrawingParticipantActivity
                 public void onResult(@NonNull Status status) {
                     Log.d(TAG, String.format("Accept connection result status: %s",status.getStatusMessage()));
                     if (status.isSuccess()){
-                        mConnectParticipantIds.add(clientId);
+                        mConnectParticipantIds.put(clientId, clientName);
 
                         sendMessageToClient(clientId, DrawingMessagesTranslator.mergeMessages(mDrawingHistorySinceLastReset));
 
@@ -127,8 +128,9 @@ public class HostDrawingActivity extends DrawingParticipantActivity
     //called when client disconnects
     public void onDisconnected(String clientId) {
         Log.d(TAG, String.format("Client [%s] disconnected from host",clientId));
-        if (mConnectParticipantIds.remove(clientId)){
-            Toast.makeText(this, "Client " + clientId + " disconnected", Toast.LENGTH_LONG).show();
+        if (mConnectParticipantIds.containsKey(clientId)){
+            Toast.makeText(this, mConnectParticipantIds.get(clientId) + " disconnected", Toast.LENGTH_LONG).show();
+            mConnectParticipantIds.remove(clientId);
         }
     }
 
@@ -150,7 +152,7 @@ public class HostDrawingActivity extends DrawingParticipantActivity
     }
 
     private void sendMessageToAllClients(EncodedMessage message){
-        for (String clientId : mConnectParticipantIds)
+        for (String clientId : mConnectParticipantIds.keySet())
             sendMessageToClient(clientId, message);
     }
 
@@ -170,7 +172,7 @@ public class HostDrawingActivity extends DrawingParticipantActivity
                 DrawingMessagesTranslator.decodeMessage(message, this);
             }
 
-            for (String clientId : mConnectParticipantIds){
+            for (String clientId : mConnectParticipantIds.keySet()){
                 if (!clientId.equals(senderId)){
                     //send client's message to all other clients
                     sendMessageToClient(clientId, new EncodedMessage(payload));
