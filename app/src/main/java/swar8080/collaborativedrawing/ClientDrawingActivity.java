@@ -24,7 +24,7 @@ import swar8080.collaborativedrawing.message.MessageAccumulator;
 import swar8080.collaborativedrawing.message.MessageProgress;
 import swar8080.collaborativedrawing.message.MessageProgressIdentifier;
 import swar8080.collaborativedrawing.message.MessageStatus;
-import swar8080.collaborativedrawing.message.MessageTranslator;
+import swar8080.collaborativedrawing.message.DrawingMessagesTranslator;
 import swar8080.collaborativedrawing.util.PreferenceUtil;
 
 /**
@@ -152,11 +152,8 @@ public class ClientDrawingActivity extends DrawingParticipantActivity
 
     private void clientRequestConnection(final String hostId, String hostName){
 
-        //TODO have client send the dimensions of its DrawingView on connection
         byte[] connectionMessage = HandshakeTranslator.encodeIdentifierHeader(
                 HandshakeIdentifier.PARTICIPANT);
-
-
 
         Nearby.Connections.sendConnectionRequest(mGoogleApiClient,
                 PreferenceUtil.getDisplayName(this),
@@ -185,24 +182,22 @@ public class ClientDrawingActivity extends DrawingParticipantActivity
 
     @Override
     public void onMessageReceived(String senderId, byte[] payload, boolean isReliable) {
-        try {
-            MessageProgress messageProgress = MessageTranslator.getMessageProgress(senderId, payload);
-            mMessageAccumulator.addMessage(messageProgress.getMessageIdentifier(), payload);
+        MessageProgress messageProgress = null;
 
-            if (MessageStatus.DONE == messageProgress.getMessageStatus()){
-                EncodedMessage message = mMessageAccumulator.removeMessage(messageProgress.getMessageIdentifier());
-                MessageTranslator.decodeMessage(message, this);
-            }
+        messageProgress = DrawingMessagesTranslator.getMessageProgress(senderId, payload);
 
-        } catch (MessageTranslator.MessageDecodingException e) {
-            Log.d(LOG_TAG,e.getMessage());
+        mMessageAccumulator.addMessage(messageProgress.getMessageIdentifier(), payload);
+
+        if (MessageStatus.DONE == messageProgress.getMessageStatus()){
+            EncodedMessage message = mMessageAccumulator.removeMessage(messageProgress.getMessageIdentifier());
+            DrawingMessagesTranslator.decodeMessage(message, this);
         }
     }
 
     @Override
     protected void onResetDrawingPressed() {
         //request a reset, reset() only after host acknowledges by sending back a reset message of its own
-        sendMessageToHost(MessageTranslator.encodeResetMessage());
+        sendMessageToHost(DrawingMessagesTranslator.encodeResetMessage());
     }
 
     @Override
@@ -222,7 +217,7 @@ public class ClientDrawingActivity extends DrawingParticipantActivity
                 mDrawingView.getHeight(),
                 mDrawingView.getWidth());
 
-        EncodedMessage message = MessageTranslator.encodeDrawMessages(mDrawingBrush.getPaintColour(),
+        EncodedMessage message = DrawingMessagesTranslator.encodeDrawMessages(mDrawingBrush.getPaintColour(),
                 mDrawingBrush.getScaledShapeScaleFactor(),
                 relativePointsDrawnAt,
                 Connections.MAX_RELIABLE_MESSAGE_LEN );

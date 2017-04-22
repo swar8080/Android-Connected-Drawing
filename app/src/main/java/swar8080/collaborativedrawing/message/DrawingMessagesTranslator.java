@@ -14,9 +14,7 @@ import swar8080.collaborativedrawing.drawing.DrawingAction;
  *
  */
 
-public class MessageTranslator {
-
-
+public class DrawingMessagesTranslator {
     private static final int INT_BYTES = Integer.SIZE/8;
     private static final int FLOAT_BYTES = Float.SIZE/8;
 
@@ -27,7 +25,7 @@ public class MessageTranslator {
     private static byte getSenderMessageID() { return mSendersMessageID++; }
 
 
-    public static MessageProgress getMessageProgress(String senderId, byte[] payload) throws MessageDecodingException {
+    public static MessageProgress getMessageProgress(String senderId, byte[] payload)  {
         PayloadHeader header = PayloadHeader.getHeaderFromPayload(payload);
         return new MessageProgress(senderId, header.messageType, header.messageStatus, header.headerBytes, header.senderMessageId);
     }
@@ -85,7 +83,7 @@ public class MessageTranslator {
         return merged;
     }
 
-    public static void decodeMessage(EncodedMessage encodedMessage, DecodedMessageHandler handler) throws MessageDecodingException{
+    public static void decodeMessage(EncodedMessage encodedMessage, DecodedMessageHandler handler) {
         byte[][] payloads = encodedMessage.getMessage();
         PayloadHeader firstHeader;
 
@@ -173,18 +171,19 @@ public class MessageTranslator {
         return message;
     }
 
-    private static DrawingAction[] decodeDrawMessage(byte[][]
-                                                        message) throws MessageDecodingException {
+    private static DrawingAction[] decodeDrawMessage(byte[][] message)  {
         ByteBuffer buffer;
         int colour;
         float relativeBrushSize;
         Pair<Float,Float>[] relativeDrawPointPairs;
+        byte[] action = null;
 
         DrawingAction[] drawingActions = new DrawingAction[message.length];
 
         try {
             int actionCount = 0;
-            for (byte[] action : message){
+            for (byte[] _action : message){
+                action = _action;
                 buffer = ByteBuffer.wrap(action);
 
                 buffer = (ByteBuffer)buffer.position(PayloadHeader.BYTE_COUNT);
@@ -201,28 +200,12 @@ public class MessageTranslator {
             }
         }
         catch (BufferUnderflowException bue){
-            throw new MessageDecodingException("Decoding draw message", DRAW_EVENT);
+            throw new MessageDecodingException(action, "Decoding draw message", bue);
         }
 
         return drawingActions;
     }
 
-
-    public static class MessageDecodingException extends Exception{
-
-        private Byte messageType;
-
-        private MessageDecodingException(String message){
-            super(message);
-            messageType = null;
-        }
-
-        private MessageDecodingException(String message, Byte messageType) {
-            super(message);
-            this.messageType = messageType;
-        }
-
-    }
 
     private static class PayloadHeader {
 
@@ -243,12 +226,12 @@ public class MessageTranslator {
             this.headerBytes = new byte[]{messageType.eventId(), status.getStatusId(), senderMessageId};
         }
 
-        private static PayloadHeader getHeaderFromPayload(byte[] payload) throws MessageDecodingException {
+        private static PayloadHeader getHeaderFromPayload(byte[] payload) {
             MessageType messageType = null;
             MessageStatus messageStatus = null;
 
             if (payload == null || payload.length < PayloadHeader.BYTE_COUNT)
-                throw new MessageDecodingException("Payload header is too small or empty");
+                throw new MessageDecodingException(payload, "Payload header is too small or empty");
 
             for (MessageType mt : MessageType.values()){
                 if (mt.eventId() == payload[TYPE_INDEX]){
@@ -257,7 +240,7 @@ public class MessageTranslator {
                 }
             }
             if (messageType == null)
-                throw new MessageDecodingException("Header missing message type");
+                throw new MessageDecodingException(payload, "Header missing message type");
 
             for (MessageStatus ms : MessageStatus.values()){
                 if (ms.getStatusId() == payload[STATUS_INDEX]){
@@ -266,7 +249,7 @@ public class MessageTranslator {
                 }
             }
             if (messageType == null)
-                throw new MessageDecodingException("Header missing message status");
+                throw new MessageDecodingException(payload, "Header missing message status");
 
             return new PayloadHeader(messageType, messageStatus, payload[MESSAGE_ID_INDEX]);
         }

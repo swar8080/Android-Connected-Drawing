@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 import swar8080.collaborativedrawing.drawing.DrawScalingUtil;
+import swar8080.collaborativedrawing.message.DrawingMessagesTranslator;
 import swar8080.collaborativedrawing.message.EncodedMessage;
 import swar8080.collaborativedrawing.message.HandshakeIdentifier;
 import swar8080.collaborativedrawing.message.HandshakeTranslator;
@@ -24,7 +25,6 @@ import swar8080.collaborativedrawing.message.MessageAccumulator;
 import swar8080.collaborativedrawing.message.MessageProgress;
 import swar8080.collaborativedrawing.message.MessageProgressIdentifier;
 import swar8080.collaborativedrawing.message.MessageStatus;
-import swar8080.collaborativedrawing.message.MessageTranslator;
 import swar8080.collaborativedrawing.message.UserCountResponse;
 import swar8080.collaborativedrawing.util.PreferenceUtil;
 
@@ -105,7 +105,7 @@ public class HostDrawingActivity extends DrawingParticipantActivity
                     if (status.isSuccess()){
                         mConnectParticipantIds.add(clientId);
 
-                        sendMessageToClient(clientId, MessageTranslator.mergeMessages(mDrawingHistorySinceLastReset));
+                        sendMessageToClient(clientId, DrawingMessagesTranslator.mergeMessages(mDrawingHistorySinceLastReset));
 
                         Toast.makeText(HostDrawingActivity.this, String.format("%s has joined",clientName),Toast.LENGTH_LONG).show();
                     }
@@ -140,7 +140,7 @@ public class HostDrawingActivity extends DrawingParticipantActivity
                 mDrawingView.getHeight(),
                 mDrawingView.getWidth());
 
-        EncodedMessage message = MessageTranslator.encodeDrawMessages(mDrawingBrush.getPaintColour(),
+        EncodedMessage message = DrawingMessagesTranslator.encodeDrawMessages(mDrawingBrush.getPaintColour(),
                 mDrawingBrush.getScaledShapeScaleFactor(),
                 relativePointsDrawnAt,
                 Connections.MAX_RELIABLE_MESSAGE_LEN );
@@ -162,13 +162,12 @@ public class HostDrawingActivity extends DrawingParticipantActivity
     @Override
     public void onMessageReceived(String senderId, byte[] payload, boolean isReliable) {
 
-        try {
-            MessageProgress messageProgress = MessageTranslator.getMessageProgress(senderId, payload);
+            MessageProgress messageProgress = DrawingMessagesTranslator.getMessageProgress(senderId, payload);
             mMessageAccumulator.addMessage(messageProgress.getMessageIdentifier(), payload);
 
             if (MessageStatus.DONE == messageProgress.getMessageStatus()){
                 EncodedMessage message = mMessageAccumulator.removeMessage(messageProgress.getMessageIdentifier());
-                MessageTranslator.decodeMessage(message, this);
+                DrawingMessagesTranslator.decodeMessage(message, this);
             }
 
             for (String clientId : mConnectParticipantIds){
@@ -177,9 +176,6 @@ public class HostDrawingActivity extends DrawingParticipantActivity
                     sendMessageToClient(clientId, new EncodedMessage(payload));
                 }
             }
-        } catch (MessageTranslator.MessageDecodingException e) {
-            Log.d(TAG, e.getMessage());
-        }
     }
 
     private void reset(){
@@ -190,12 +186,12 @@ public class HostDrawingActivity extends DrawingParticipantActivity
     @Override
     public void onResetMessageReceived() {
         reset();
-        sendMessageToAllClients(MessageTranslator.encodeResetMessage());
+        sendMessageToAllClients(DrawingMessagesTranslator.encodeResetMessage());
     }
 
     @Override
     protected void onResetDrawingPressed() {
         reset();
-        sendMessageToAllClients(MessageTranslator.encodeResetMessage());
+        sendMessageToAllClients(DrawingMessagesTranslator.encodeResetMessage());
     }
 }

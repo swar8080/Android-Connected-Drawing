@@ -19,7 +19,6 @@ public class HandshakeTranslator {
         return new byte[]{identifier.getId()};
     }
 
-
     public static byte[] encodeUserCountResponse(UserCountResponse userCountResponse){
         ByteBuffer buffer = ByteBuffer.allocate(Integer.SIZE/8);
         buffer.putInt(0,userCountResponse.getUserCount());
@@ -28,16 +27,20 @@ public class HandshakeTranslator {
 
     public static Result<UserCountResponse> decodeUserCountResponse(byte[] content){
         UserCountResponse response;
+        HandshakeIdentifier ident = decodeMessageIdentifier(content);
 
-        if (HandshakeIdentifier.USER_COUNT_REQUEST != decodeMessageIdentifier(content)){
+        if (HandshakeIdentifier.USER_COUNT_REQUEST != ident){
             return new Result<>(false);
+        }
+
+        if (content.length < HEADER_LENGTH + Integer.SIZE/8){
+            throw new MessageDecodingException(content, "Invalid user count response");
         }
 
         //TODO add error handling for correct identifier, wrong content
         ByteBuffer buffer = ByteBuffer.wrap(content);
         response = new UserCountResponse(buffer.getInt(HEADER_LENGTH));
-
-        return new Result<UserCountResponse>(response);
+        return new Result<>(response);
     }
 
     private static byte[] addHeaderAndContent(HandshakeIdentifier identifier, byte[] content){
@@ -48,9 +51,9 @@ public class HandshakeTranslator {
         return buffer.array();
     }
 
-    public static HandshakeIdentifier decodeMessageIdentifier(byte[] message){
+    public static HandshakeIdentifier decodeMessageIdentifier(byte[] message) {
         if (message == null || message.length < HEADER_LENGTH)
-            return null;
+            throw new MessageDecodingException(message);
 
         byte id = message[0];
 
@@ -60,32 +63,6 @@ public class HandshakeTranslator {
             }
         }
         return null;
-    }
-
-    public static class DecodedIdentifierResponse<T>{
-
-        private T obj;
-        private boolean result;
-
-        //Result was succesful
-        private DecodedIdentifierResponse(T obj){
-            this.obj = obj;
-            this.result = true;
-        }
-
-        //Result may be succesful (no response required)
-        private DecodedIdentifierResponse(boolean result){
-            this.result = result;
-        }
-
-        public boolean isSuccesful(){
-            return result;
-        }
-
-        public T getResult(){
-            return obj;
-        }
-
     }
 
 }

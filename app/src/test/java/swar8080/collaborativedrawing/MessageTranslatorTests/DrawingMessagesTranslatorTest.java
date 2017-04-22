@@ -9,14 +9,14 @@ import java.util.LinkedList;
 import swar8080.collaborativedrawing.message.EncodedMessage;
 import swar8080.collaborativedrawing.message.MessageProgress;
 import swar8080.collaborativedrawing.message.MessageStatus;
-import swar8080.collaborativedrawing.message.MessageTranslator;
+import swar8080.collaborativedrawing.message.DrawingMessagesTranslator;
 import swar8080.collaborativedrawing.message.MessageType;
 
 /**
  *
  */
 
-public class MessageTranslatorTest {
+public class DrawingMessagesTranslatorTest {
 
     private LinkedList<EncodedMessage> messagesToMerge;
 
@@ -24,14 +24,14 @@ public class MessageTranslatorTest {
     public void setUp(){
         messagesToMerge = new LinkedList<>();
         for (int i=0; i<3; i++)
-            messagesToMerge.add(MessageTranslator.encodeResetMessage());
+            messagesToMerge.add(DrawingMessagesTranslator.encodeResetMessage());
     }
 
 
     @org.junit.Test
-    public void mergeEncodingStatusesAreUpdated() throws Exception{
+    public void mergeEncodingStatusesAreUpdated(){
 
-        EncodedMessage merged = MessageTranslator.mergeMessages(messagesToMerge);
+        EncodedMessage merged = DrawingMessagesTranslator.mergeMessages(messagesToMerge);
 
         Assert.assertTrue("First merged message status is START",isDrawMessageStatusAtPayload(MessageStatus.START, merged, 0));
         Assert.assertTrue("Second merged message status is IN_PROGRESS",isDrawMessageStatusAtPayload(MessageStatus.IN_PROGRESS, merged, 1));
@@ -40,8 +40,8 @@ public class MessageTranslatorTest {
     }
 
     @org.junit.Test
-    public void mergeEncodingIdentifierNumbersMatch() throws Exception{
-        EncodedMessage merged = MessageTranslator.mergeMessages(messagesToMerge);
+    public void mergeEncodingIdentifierNumbersMatch() {
+        EncodedMessage merged = DrawingMessagesTranslator.mergeMessages(messagesToMerge);
 
         byte messageNumberExpected = getPayloadMessageNumberIdentifier(merged, 0);
 
@@ -53,18 +53,18 @@ public class MessageTranslatorTest {
         }
     }
 
-    public static boolean isDrawMessageStatusAtPayload(MessageStatus expectedMessageStatus, EncodedMessage message, int payloadIndex ) throws Exception {
-        MessageProgress drawMessageProgressIdentifier = MessageTranslator.getMessageProgress("", message.getMessage()[payloadIndex]);
+    static boolean isDrawMessageStatusAtPayload(MessageStatus expectedMessageStatus, EncodedMessage message, int payloadIndex )  {
+        MessageProgress drawMessageProgressIdentifier = DrawingMessagesTranslator.getMessageProgress("", message.getMessage()[payloadIndex]);
         return drawMessageProgressIdentifier.getMessageStatus().equals(expectedMessageStatus);
     }
 
-    public static boolean isMessageTypeAtPayload(MessageType expectedMessageType, EncodedMessage message, int payloadIndex) throws Exception {
-        MessageProgress drawMessageProgressIdentifier = MessageTranslator.getMessageProgress("", message.getMessage()[payloadIndex]);
+    static boolean isMessageTypeAtPayload(MessageType expectedMessageType, EncodedMessage message, int payloadIndex)  {
+        MessageProgress drawMessageProgressIdentifier = DrawingMessagesTranslator.getMessageProgress("", message.getMessage()[payloadIndex]);
         return drawMessageProgressIdentifier.getMessageType().equals(expectedMessageType);
     }
 
-    public static byte getPayloadMessageNumberIdentifier(EncodedMessage message, int payloadIndex) throws Exception{
-        return MessageTranslator.getMessageProgress("", message.getMessage()[payloadIndex]).getMessageIdentifier().getSenderMessageNumber();
+    static byte getPayloadMessageNumberIdentifier(EncodedMessage message, int payloadIndex) {
+        return DrawingMessagesTranslator.getMessageProgress("", message.getMessage()[payloadIndex]).getMessageIdentifier().getSenderMessageNumber();
     }
 
 

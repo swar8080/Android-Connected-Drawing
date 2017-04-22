@@ -2,8 +2,10 @@ package swar8080.collaborativedrawing.MessageTranslatorTests;
 
 import org.junit.Assert;
 
+import swar8080.collaborativedrawing.message.HandshakeIdentifier;
 import swar8080.collaborativedrawing.message.HandshakeTranslator;
 import swar8080.collaborativedrawing.Result;
+import swar8080.collaborativedrawing.message.MessageDecodingException;
 import swar8080.collaborativedrawing.message.UserCountResponse;
 
 /**
@@ -23,21 +25,24 @@ public class HandshakeTranslatorTest {
         Assert.assertEquals("Decoded UserCountResponse equals Encoded", original, decoded.getResult());
     }
 
-    @org.junit.Test
-    public void decodeInvalidUserCountResponse(){
-        Result<UserCountResponse> response;
 
-        byte[] invalidHeader = new byte[]{Byte.MAX_VALUE};
-        response = HandshakeTranslator.decodeUserCountResponse(invalidHeader);
-        Assert.assertFalse("Invalid header should return false result",response.isSuccesful());
-
-        byte[] nullResponse = null;
-        response = HandshakeTranslator.decodeUserCountResponse(nullResponse);
-        Assert.assertFalse("Null response should return false result",response.isSuccesful());
-
-        //TODO add test for missing/incorrect content
-
+    @org.junit.Test(expected = MessageDecodingException.class)
+    public void decodeNullIdentifier(){
+        HandshakeTranslator.decodeMessageIdentifier(null);
     }
 
+    @org.junit.Test(expected = MessageDecodingException.class)
+    public void decodeEmptyIdentifier(){
+        HandshakeTranslator.decodeMessageIdentifier(new byte[]{});
+    }
+
+    @org.junit.Test
+    public void decodeUserCountResponseInvalidIdent(){
+        Result<UserCountResponse> response;
+
+        byte[] wrongIdentHeader = HandshakeTranslator.encodeIdentifierHeader(HandshakeIdentifier.PARTICIPANT);
+        response = HandshakeTranslator.decodeUserCountResponse(wrongIdentHeader);
+        Assert.assertFalse("Invalid header identifier should return false result",response.isSuccesful());
+    }
 
 }

@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 
@@ -18,6 +19,7 @@ import swar8080.collaborativedrawing.connection.AvailableSession;
 import swar8080.collaborativedrawing.connection.NearbyConnectionsUtil;
 import swar8080.collaborativedrawing.message.HandshakeIdentifier;
 import swar8080.collaborativedrawing.message.HandshakeTranslator;
+import swar8080.collaborativedrawing.message.MessageDecodingException;
 import swar8080.collaborativedrawing.message.UserCountResponse;
 import swar8080.collaborativedrawing.util.PreferenceUtil;
 import swar8080.collaborativedrawing.util.SerialExecutor;
@@ -29,6 +31,8 @@ public class LobbyActivity extends AutoManagedGoogleApiActivity implements Avail
 
     private RecyclerView mAvailableSessionRecyclerView;
     private ProgressBar mDiscoverProgressBar;
+
+    private final String TAG = getClass().getSimpleName();
 
     @Override
     protected GoogleApiClient.Builder getGoogleApiClientBuilder() {
@@ -125,7 +129,7 @@ public class LobbyActivity extends AutoManagedGoogleApiActivity implements Avail
                                 Nearby.Connections.disconnectFromEndpoint(mGoogleApiClient ,endPointId);
                             }
                             else {
-                                //todo add logging when connection response is not succesful
+                                Log.d(TAG, "User count connection request failed: " + status.toString());
                             }
                         }
                     },

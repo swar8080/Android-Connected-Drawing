@@ -10,7 +10,7 @@ import org.junit.*;
 import swar8080.collaborativedrawing.drawing.DrawingAction;
 import swar8080.collaborativedrawing.message.EncodedMessage;
 import swar8080.collaborativedrawing.message.MessageStatus;
-import swar8080.collaborativedrawing.message.MessageTranslator;
+import swar8080.collaborativedrawing.message.DrawingMessagesTranslator;
 import swar8080.collaborativedrawing.message.MessageType;
 
 import static junit.framework.Assert.assertEquals;
@@ -38,14 +38,14 @@ public class DrawMessageTranslatorTest {
         Pair<Float,Float>[] points;
 
         points = new Pair[] {p(1,1)};
-        singlePayloadDrawMessage = MessageTranslator.encodeDrawMessages(BRUSH_COLOR, RELATIVE_BRUSH_SIZE,
+        singlePayloadDrawMessage = DrawingMessagesTranslator.encodeDrawMessages(BRUSH_COLOR, RELATIVE_BRUSH_SIZE,
             points,
             MAX_BYTES_PER_MESSAGE
         );
 
         int messageSizeToHaveSinglePointPerMessage = singlePayloadDrawMessage.getMessage()[0].length;
 
-        twoPayloadDrawMessage = MessageTranslator.encodeDrawMessages(BRUSH_COLOR, RELATIVE_BRUSH_SIZE,
+        twoPayloadDrawMessage = DrawingMessagesTranslator.encodeDrawMessages(BRUSH_COLOR, RELATIVE_BRUSH_SIZE,
                 TWO_PAYLOAD_POINTS,
                 messageSizeToHaveSinglePointPerMessage
         );
@@ -53,7 +53,7 @@ public class DrawMessageTranslatorTest {
             fail("Error creating two payload draw message");
 
         points = new Pair[] {p(1,1), p(2,2), p(3,3)};
-        threePayloadDrawMessage = MessageTranslator.encodeDrawMessages(BRUSH_COLOR, RELATIVE_BRUSH_SIZE,
+        threePayloadDrawMessage = DrawingMessagesTranslator.encodeDrawMessages(BRUSH_COLOR, RELATIVE_BRUSH_SIZE,
                 points,
                 messageSizeToHaveSinglePointPerMessage
         );
@@ -68,48 +68,48 @@ public class DrawMessageTranslatorTest {
     }
 
     @org.junit.Test
-    public void encodeSinglePayloadDrawMessageHeader() throws Exception {
+    public void encodeSinglePayloadDrawMessageHeader()  {
         Assert.assertTrue("Single payload draw message type must be DRAW_EVENT",
-                MessageTranslatorTest.isMessageTypeAtPayload(MessageType.DRAW_EVENT, singlePayloadDrawMessage, 0));
+                DrawingMessagesTranslatorTest.isMessageTypeAtPayload(MessageType.DRAW_EVENT, singlePayloadDrawMessage, 0));
         Assert.assertTrue("Single payload draw message status must be DONE",
-                MessageTranslatorTest.isDrawMessageStatusAtPayload(MessageStatus.DONE, singlePayloadDrawMessage, 0));
+                DrawingMessagesTranslatorTest.isDrawMessageStatusAtPayload(MessageStatus.DONE, singlePayloadDrawMessage, 0));
     }
 
     @org.junit.Test
-    public void encodeTwoPointDrawMessageHeader() throws Exception {
+    public void encodeTwoPointDrawMessageHeader()  {
         Assert.assertTrue("Double payload draw message's first type must be DRAW_EVENT",
-                MessageTranslatorTest.isMessageTypeAtPayload(MessageType.DRAW_EVENT, twoPayloadDrawMessage, 0));
+                DrawingMessagesTranslatorTest.isMessageTypeAtPayload(MessageType.DRAW_EVENT, twoPayloadDrawMessage, 0));
         Assert.assertTrue("Double payload draw message's first status must be START",
-                MessageTranslatorTest.isDrawMessageStatusAtPayload(MessageStatus.START, twoPayloadDrawMessage, 0));
+                DrawingMessagesTranslatorTest.isDrawMessageStatusAtPayload(MessageStatus.START, twoPayloadDrawMessage, 0));
 
         Assert.assertTrue("Double payload draw message's second type must be DRAW_EVENT",
-                MessageTranslatorTest.isMessageTypeAtPayload(MessageType.DRAW_EVENT, twoPayloadDrawMessage, 1));
+                DrawingMessagesTranslatorTest.isMessageTypeAtPayload(MessageType.DRAW_EVENT, twoPayloadDrawMessage, 1));
         Assert.assertTrue("Double payload draw message's second status must be DONE",
-                MessageTranslatorTest.isDrawMessageStatusAtPayload(MessageStatus.DONE, twoPayloadDrawMessage, 1));
+                DrawingMessagesTranslatorTest.isDrawMessageStatusAtPayload(MessageStatus.DONE, twoPayloadDrawMessage, 1));
     }
 
     @org.junit.Test
-    public void encodeThreePayloadDrawMessageHeader() throws Exception {
+    public void encodeThreePayloadDrawMessageHeader()  {
         Assert.assertTrue("Triple payload draw message's first type must be DRAW_EVENT",
-                MessageTranslatorTest.isMessageTypeAtPayload(MessageType.DRAW_EVENT, threePayloadDrawMessage, 0));
+                DrawingMessagesTranslatorTest.isMessageTypeAtPayload(MessageType.DRAW_EVENT, threePayloadDrawMessage, 0));
         Assert.assertTrue("Triple payload draw message's first status must be START",
-                MessageTranslatorTest.isDrawMessageStatusAtPayload(MessageStatus.START, threePayloadDrawMessage, 0));
+                DrawingMessagesTranslatorTest.isDrawMessageStatusAtPayload(MessageStatus.START, threePayloadDrawMessage, 0));
 
         Assert.assertTrue("Triple payload draw message's second type must be DRAW_EVENT",
-                MessageTranslatorTest.isMessageTypeAtPayload(MessageType.DRAW_EVENT, threePayloadDrawMessage, 1));
+                DrawingMessagesTranslatorTest.isMessageTypeAtPayload(MessageType.DRAW_EVENT, threePayloadDrawMessage, 1));
         Assert.assertTrue("Triple payload draw message's second status must be IN_PROGRESS",
-                MessageTranslatorTest.isDrawMessageStatusAtPayload(MessageStatus.IN_PROGRESS, threePayloadDrawMessage, 1));
+                DrawingMessagesTranslatorTest.isDrawMessageStatusAtPayload(MessageStatus.IN_PROGRESS, threePayloadDrawMessage, 1));
 
         Assert.assertTrue("Triple payload draw message's third type must be DRAW_EVENT",
-                MessageTranslatorTest.isMessageTypeAtPayload(MessageType.DRAW_EVENT, threePayloadDrawMessage, 2));
+                DrawingMessagesTranslatorTest.isMessageTypeAtPayload(MessageType.DRAW_EVENT, threePayloadDrawMessage, 2));
         Assert.assertTrue("Triple payload draw message's third status must be DONE",
-                MessageTranslatorTest.isDrawMessageStatusAtPayload(MessageStatus.DONE, threePayloadDrawMessage, 2));
+                DrawingMessagesTranslatorTest.isDrawMessageStatusAtPayload(MessageStatus.DONE, threePayloadDrawMessage, 2));
     }
 
     @org.junit.Test
-    public void decodeDrawMessage() throws Exception{
+    public void decodeDrawMessage() {
         TestableDecodedMessageHandler handler = new TestableDecodedMessageHandler();
-        MessageTranslator.decodeMessage(twoPayloadDrawMessage, handler);
+        DrawingMessagesTranslator.decodeMessage(twoPayloadDrawMessage, handler);
 
         DrawingAction[] decodedActions = handler.lastDrawingAction;
 
