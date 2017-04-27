@@ -5,11 +5,8 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 
@@ -71,19 +68,6 @@ public class LobbyActivity extends AutoManagedGoogleApiActivity implements Avail
             //TODO open keyboard for empty screen name
             mScreenNameText.requestFocus();
         }
-
-        mScreenNameText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                //remember their screen name
-                PreferenceUtil.setPrefScreenName(LobbyActivity.this, s.toString());
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override
-            public void afterTextChanged(Editable s) {}
-        });
 
         findViewById(R.id.startAdvertiseButton).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -175,6 +159,8 @@ public class LobbyActivity extends AutoManagedGoogleApiActivity implements Avail
 
         Intent intent = new Intent();
         intent.setClass(this, HostDrawingActivity.class);
+
+        PreferenceUtil.setPrefScreenName(this, getScreenName());
         intent.putExtra(HostDrawingActivity.SCREEN_NAME, getScreenName());
 
         super.disconnectAndStartActivity(intent);
@@ -187,6 +173,8 @@ public class LobbyActivity extends AutoManagedGoogleApiActivity implements Avail
 
         joinDrawingSessionIntent.putExtra(ClientDrawingActivity.HOST_ID_EXTRA, sessionSelected.getHostId());
         joinDrawingSessionIntent.putExtra(ClientDrawingActivity.HOST_NAME_EXTRA, sessionSelected.getSessionName());
+
+        PreferenceUtil.setPrefScreenName(this, getScreenName());
         joinDrawingSessionIntent.putExtra(DrawingParticipantActivity.SCREEN_NAME, getScreenName());
 
         super.disconnectAndStartActivity(joinDrawingSessionIntent);

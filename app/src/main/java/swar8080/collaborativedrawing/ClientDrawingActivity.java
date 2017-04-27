@@ -51,8 +51,6 @@ public class ClientDrawingActivity extends DrawingParticipantActivity
 
     @Override
     protected void afterOnCreateCallback(Bundle savedInstanceState) {
-        mDrawingView.setDrawingEnabled(false);
-
         Bundle connectionDetailsExtra = getIntent().getExtras();
         if (connectionDetailsExtra != null){
             mHostId = connectionDetailsExtra.getString(HOST_ID_EXTRA);
@@ -60,10 +58,9 @@ public class ClientDrawingActivity extends DrawingParticipantActivity
         }
 
         mConnectingProgressBar = (ProgressBar)findViewById(R.id.clientConnectingProgressBar);
-
         mMessageAccumulator = new MessageAccumulator<>();
 
-        super.showToolbarStatus(getString(R.string.drawing_status_connecting_api));
+        disableControls(getString(R.string.drawing_status_connecting_api));
     }
 
     @Override
@@ -74,6 +71,17 @@ public class ClientDrawingActivity extends DrawingParticipantActivity
         //when reconnecting, the host will send all DrawingActions since the last reset
         //which will make the client up-to-date if starting in a reset state
         reset();
+    }
+
+    public void disableControls(String statusMessage){
+        mDrawingView.setDrawingEnabled(false);
+        mConnectingProgressBar.setVisibility(View.VISIBLE);
+        showToolbarStatus(statusMessage);
+    }
+
+    public void enableControls(){
+        mConnectingProgressBar.setVisibility(View.GONE);
+        showControls();
     }
 
     @Override
@@ -95,14 +103,14 @@ public class ClientDrawingActivity extends DrawingParticipantActivity
             });
         }
         else {
-            exitToLobby();
+            disableControls("Error finding hodt");
         }
     }
 
     @Override
     //disconnected from host
     public void onDisconnected(String hostId) {
-        super.showToolbarStatus(getString(R.string.drawing_status_reconnecting));
+        disableControls(getString(R.string.drawing_status_reconnecting));
         discoverHost();
         Log.d(LOG_TAG,String.format("Client disconnected from host [%s]",hostId));
     }
@@ -111,14 +119,14 @@ public class ClientDrawingActivity extends DrawingParticipantActivity
     //connection to google api suspended
     public void onConnectionSuspended(int cause){
         super.onConnectionSuspended(cause);
-        super.showToolbarStatus(getString(R.string.drawing_status_reconnecting));
+        disableControls(getString(R.string.drawing_status_reconnecting));
     }
 
     @Override
     //connection to google api failed
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult){
         super.onConnectionFailed(connectionResult);
-        super.showToolbarStatus(getString(R.string.drawing_status_connecting_api_failed));
+        disableControls(getString(R.string.drawing_status_connecting_api_failed));
     }
 
     private PendingResult<Status> discoverHost(){
@@ -143,13 +151,6 @@ public class ClientDrawingActivity extends DrawingParticipantActivity
                 });
     }
 
-    public void exitToLobby(){
-        //todo exit if session is not available
-        Log.d(LOG_TAG, "exiting to lobby");
-        mDrawingView.setDrawingEnabled(false);
-        mConnectingProgressBar.setVisibility(View.VISIBLE);
-    }
-
     private void clientRequestConnection(final String hostId, String hostName){
 
         byte[] connectionMessage = HandshakeTranslator.encodeIdentifierHeader(
@@ -166,7 +167,7 @@ public class ClientDrawingActivity extends DrawingParticipantActivity
                         if (status.isSuccess()){
                             mDrawingView.setDrawingEnabled(true);
                             mConnectingProgressBar.setVisibility(View.GONE);
-                            showControls();
+                            enableControls();
                         }
                     }
                 },
@@ -232,5 +233,13 @@ public class ClientDrawingActivity extends DrawingParticipantActivity
     }
 
 
-
+    @Override
+    public void onInternetConnectionChanged(boolean isConnectedOrConnecting) {
+        if (isConnectedOrConnecting){
+            enableControls();
+        }
+        else {
+            disableControls(getString(R.string.drawing_status_no_connection));
+        }
+    }
 }

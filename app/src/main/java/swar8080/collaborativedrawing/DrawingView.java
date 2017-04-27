@@ -3,6 +3,7 @@ package swar8080.collaborativedrawing;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.util.AttributeSet;
 import android.support.v4.util.Pair;
 import android.view.MotionEvent;
@@ -19,6 +20,7 @@ public class DrawingView extends View {
     private int mWidth, mHeight;
     private Canvas mCanvas;
     private Bitmap mBitmap;
+    private static final int DEFAULT_BITMAP_BACKGROUND = Color.WHITE;
     private onUserDrawEventListener mDrawEventListener;
     private boolean mDrawingEnabled = true;
 
@@ -38,9 +40,12 @@ public class DrawingView extends View {
         this.mDrawEventListener = listener;
     }
 
+    public Bitmap getBitmap(){ return mBitmap; }
     public void setDrawingEnabled(boolean enabled){
         mDrawingEnabled = enabled;
     }
+
+
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -101,6 +106,7 @@ public class DrawingView extends View {
 
     public void reset(){
         mBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
+        mBitmap.eraseColor(DEFAULT_BITMAP_BACKGROUND);
         mCanvas = new Canvas(mBitmap);
         invalidate();
     }

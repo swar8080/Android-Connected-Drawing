@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"
+<android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
 
     android:id="@+id/drawingToolbar"
     android:title=""
     android:layout_width="match_parent"
     android:layout_height="50dp"
+    android:gravity="center_horizontal"
     android:background="@color/colorPrimary"
     android:elevation="4dp"
+
     >
 
 
@@ -18,9 +21,9 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="gone"
-            android:gravity="center"
+            android:layout_gravity="left"
+            android:gravity="center_vertical"
             android:textSize="24sp"
-
             tools:visibility="visible"
             tools:text="Drawing Status"/>
 
@@ -29,8 +32,8 @@
             android:id="@+id/drawingToolbarControls"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_gravity="center"
             android:orientation="horizontal"
+            android:layout_gravity="right"
             android:visibility="visible"
             tools:visibility="visible">
 
@@ -41,6 +44,7 @@
                 android:layout_marginRight="5dp"
                 android:text="@string/brush_size_button_text"
                 android:layout_gravity="center"
+
                 >
             </Button>
 
@@ -55,17 +59,6 @@
                 android:textColor="@color/colourBlack"
                 android:textStyle="bold"
                 />
-
-
-            <Button android:id="@+id/resetButton"
-                android:layout_height="match_parent"
-                android:layout_width="wrap_content"
-                android:text="@string/reset_button_text"
-                android:layout_gravity="center"
-                android:layout_marginLeft="5dp"
-                >
-
-            </Button>
         </LinearLayout>
 
     </FrameLayout>

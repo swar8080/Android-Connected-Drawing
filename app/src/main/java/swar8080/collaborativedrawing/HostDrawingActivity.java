@@ -196,4 +196,14 @@ public class HostDrawingActivity extends DrawingParticipantActivity
         reset();
         sendMessageToAllClients(DrawingMessagesTranslator.encodeResetMessage());
     }
+
+    @Override
+    public void onInternetConnectionChanged(boolean isConnectedOrConnecting) {
+        if (isConnectedOrConnecting){
+            showControls();
+        }
+        else {
+            showToolbarStatus(getString(R.string.drawing_status_no_connection));
+        }
+    }
 }

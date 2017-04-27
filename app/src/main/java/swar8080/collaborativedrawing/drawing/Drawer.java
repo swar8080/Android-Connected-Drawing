@@ -9,5 +9,4 @@ import android.graphics.Paint;
 
 public interface Drawer {
     void drawIntoCanvas(Canvas canvas, float x, float y);
-    Paint getPaint();
 }

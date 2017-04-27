@@ -19,6 +19,11 @@
     <string name="colour_picker_icon">Colour</string>
     <string name="colour_picker_title">Select a Colour:</string>
 
+    <string name="file_name_dialog_header">Enter a name for the drawing:</string>
+    <string name="file_name_submit_button">Submit</string>
+    <string name="file_name_cancel_button">Cancel</string>
+    <string name="file_name_error_message">Error: Invalid file name</string>
+
     <string name="service_id">swar8080.collaborativedrawing</string>
 
 </resources>
