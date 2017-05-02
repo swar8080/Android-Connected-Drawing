@@ -38,7 +38,7 @@ public class AvailableSessionAdapter extends RecyclerView.Adapter<AvailableSessi
         for (int i=0; i<length; i++){
             existingSession = mAvailableSessions.get(i);
             if (availableSession.getHostId().equals(existingSession.getHostId())
-                    && availableSession.getSessionName().equals(existingSession.getHostId())){
+                    && availableSession.getSessionName().equals(existingSession.getSessionName())){
                 mAvailableSessions.set(i, existingSession);
                 notifyItemChanged(i);
                 return;

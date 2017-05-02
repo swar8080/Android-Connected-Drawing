@@ -14,7 +14,7 @@
         android:id="@+id/availableSessionName"
         android:layout_weight="0.65"
         android:gravity="center_vertical"
-        android:textSize="28sp"
+        android:textSize="24dp"
         android:textColor="@color/colourBlack"
         tools:text="Player Name"/>
 
@@ -33,7 +33,7 @@
         android:gravity="center"
         android:textColor="@color/colourBlack"
         android:textStyle="bold"
-        android:textSize="16sp"
+        android:textSize="16dp"
 
         tools:text="10" />
 
@@ -43,6 +43,6 @@
         android:layout_weight="0.15"
         android:layout_gravity="center"
         android:text="@string/join_session_button"
-        android:textSize="10sp"/>
+        android:textSize="12dp"/>
 
 </LinearLayout>
