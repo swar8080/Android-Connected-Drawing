@@ -5,4 +5,8 @@
     <color name="colorAccent">#FF4081</color>
     <color name="defaultDrawingColour">#FFEC16</color>
     <color name="colourBlack">#000000</color>
+
+
+    <color name="available_session_border_colour">#d0d4d8</color>
+    <color name="lobby_background_colour">#FFFFFF</color>
 </resources>

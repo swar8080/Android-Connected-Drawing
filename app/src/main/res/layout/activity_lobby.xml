@@ -35,29 +35,31 @@
             android:text="@string/screen_name_label"
             android:textColor="@color/black"
             android:textSize="18sp"
+            android:fontFamily="casual"
             />
 
         <EditText
             android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:textSize="18sp"
+            android:textSize="16sp"
             android:id="@+id/screenName"
             tools:text="Session Name"
+            android:fontFamily="casual"
             />
     </LinearLayout>
 
 
-    <Button
+    <Button android:id="@+id/startAdvertiseButton"
         android:text="@string/start_advertising_button_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/startAdvertiseButton"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/sessionNameContainer"
         app:layout_constraintLeft_toLeftOf="parent"
         android:textSize="14sp"
-        android:textAllCaps="false"/>
+        android:fontFamily="sans-serif-condensed"
+        />
 
     <TextView
         android:layout_width="wrap_content"
@@ -67,7 +69,8 @@
         android:text="@string/available_sessions_header"
         android:textColor="@color/black"
         android:textSize="24sp"
-        android:layout_marginTop="8dp"
+        android:fontFamily="casual"
+        android:layout_marginTop="32dp"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintLeft_toLeftOf="parent" />
 

@@ -2,21 +2,24 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="horizontal"
+    android:background="@drawable/available_session_border"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginLeft="8dp"
-    android:layout_marginRight="8dp">
+    android:layout_marginRight="8dp"
+    android:paddingBottom="4dp">
 
 
     <TextView
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
         android:id="@+id/availableSessionName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:layout_weight="0.65"
+        android:fontFamily="casual"
         android:gravity="center_vertical"
-        android:textSize="24dp"
         android:textColor="@color/colourBlack"
-        tools:text="Player Name"/>
+        android:textSize="24dp"
+        tools:text="Player Name" />
 
 
     <ImageView
@@ -35,6 +38,7 @@
         android:textStyle="bold"
         android:textSize="16dp"
 
+
         tools:text="10" />
 
     <Button android:id="@+id/join_session_button"
@@ -42,7 +46,10 @@
         android:layout_height="40sp"
         android:layout_weight="0.15"
         android:layout_gravity="center"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="2dp"
         android:text="@string/join_session_button"
-        android:textSize="12dp"/>
+        android:textSize="12dp"
+        android:fontFamily="sans-serif-condensed"/>
 
 </LinearLayout>

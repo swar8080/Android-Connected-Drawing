@@ -3,7 +3,7 @@
     <string name="title_activity_host_drawing">HostDrawingActivity</string>
 
     <string name="screen_name_label">Screen Name:</string>
-    <string name="start_advertising_button_text">Start A New Session</string>
+    <string name="start_advertising_button_text">Start New Session</string>
     <string name="available_sessions_header">Existing Sessions:</string>
     <string name="join_session_button">Join</string>
 
